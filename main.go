@@ -11,11 +11,11 @@ import (
 type line []byte
 type lines []line
 
-//type kline struct {
+//type kvalline struct {
 //	key  []byte
 //	line []byte
 //}
-//type klines []kline
+//type kvallines []kvalline
 
 func main() {
 	var fns []string
@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 	fns = flag.Args()
 
-	var klns klines
+	var klns kvallines
 
 	var err error
 
@@ -48,7 +48,7 @@ func main() {
 			l := scanner.Text()
 
 			bln := []byte(l)
-			var kl kline
+			var kl kvalline
 			kl.line = bln
 			kl.key = kl.line
 			klns = append(klns, kl)

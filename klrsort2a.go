@@ -2,18 +2,18 @@ package main
 
 const THRESHOLD int = 1 << 5
 
-// kline key will become a generated key in some instances
+// kvalline key will become a generated key in some instances
 // in others, it will be a subslice of line
 //type line []byte
 //type lines []line
 
-type kline struct {
+type kvalline struct {
 	key  []byte
 	line []byte
 }
-type klines []kline
+type kvallines []kvalline
 
-func binsertionsort(klns klines) {
+func binsertionsort(klns kvallines) {
 	n := len(klns)
 	if n == 1 {
 		return
@@ -26,8 +26,8 @@ func binsertionsort(klns klines) {
 }
 
 // bostic
-func klrsort2a(klns klines, recix int) {
-	var piles = make([]klines, 256)
+func klrsort2a(klns kvallines, recix int) {
+	var piles = make([]kvallines, 256)
 	var nc int
 
 	if len(klns) == 0 {
@@ -44,7 +44,7 @@ func klrsort2a(klns klines, recix int) {
 			continue
 		}
 
-		// aooend kline to the pile indexed by c
+		// aooend kvalline to the pile indexed by c
 		c := int(l.key[recix])
 		piles[int(c)] = append(piles[int(c)], l)
 		if len(piles[c]) == 1 {

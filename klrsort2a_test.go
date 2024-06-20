@@ -6,21 +6,21 @@ import (
 	"testing"
 )
 
-//type kline struct {
+//type kvalline struct {
 //	key  []byte
 //	line []byte
 //}
-//type klines []kline
+//type kvallines []kvalline
 
 func Test_rsort2a(t *testing.T) {
 
-	var klns klines
+	var klns kvallines
 	var l uint = 32
 	ls := []uint{1, 2, 1<<4, 1<<8, 1<<16, 1<<20, 1<<24}
 
 	for _, i := range ls {
 
-		var kln kline
+		var kln kvalline
 
 		log.Print("testing sort of ", i)
 		rsl := randomstrings(i, l)
