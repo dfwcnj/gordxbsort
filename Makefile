@@ -7,7 +7,7 @@ fmt:
 	go fmt klrsort2a.go
 
 vet: fmt
-	go vet main.go klrsort2a.go sfpread.go
+	go vet main.go klrsort2a.go sfpread.go klchan.go
 	go vet randomdata.go klrsort2a.go klrsort2a_test.go
 
 build: vet
