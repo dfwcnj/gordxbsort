@@ -53,7 +53,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 		}
 
 	}
-	return klns, dn, nil
+	//return klns, dn, nil
 }
 
 func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
@@ -92,7 +92,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 		}
 
 	}
-	return klns, dn, nil
+	//return klns, dn, nil
 
 }
 

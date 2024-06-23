@@ -7,11 +7,11 @@ fmt:
 	go fmt klrsort2a.go
 
 vet: fmt
-	go vet main.go klrsort2a.go sfpread.go klchan.go
+	go vet main.go klrsort2a.go sfpread.go merge.go
 	go vet randomdata.go klrsort2a.go klrsort2a_test.go
 
 build: vet
-	go build -o rdxbin  main.go klrsort2a.go
+	go build -o rdxbin  main.go klrsort2a.go merge.go sfpread.go
 
 profile:
 	go test -cpuprofile cpu.prof -memprofile mem.prof -bench .
