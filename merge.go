@@ -5,7 +5,49 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"path/filepath"
 )
+
+func mergefiles(dn string, lpo int) {
+}
+
+// save merge file
+// save key and line separated by null bute
+func savemergefile(klns kvallines, fn string, dn string) string {
+	bn := filepath.Base(fn)
+	pfn := filepath.Join(dn, bn)
+	fp, err := os.OpenFile(pfn, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fp.Close()
+
+	for _, kln := range klns {
+
+		var n = byte(0)
+		knl := string(kln.key) + string(n) + string(kln.line)
+
+		_, err := fp.Write([]byte(knl))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return fn
+}
+
+// bufSplit(buf, reclen)
+//
+// split the buffer into a slice containing reclen records
+func bufSplit(buf []byte, reclen int) lines {
+	buflen := len(buf)
+	var lns lines
+	for o := 0; o < buflen; o += reclen {
+		rec := buf[o : o+reclen-1]
+		lns = append(lns, rec)
+	}
+	return lns
+}
 
 // klnulldelim(bl)
 // example function for generating a key from a byte array

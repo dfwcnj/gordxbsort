@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 type line []byte
@@ -18,47 +17,6 @@ type lines []line
 //	}
 //
 // type kvallines []kvalline
-
-func mergefiles(dn string, lpo int) {
-}
-
-// save merge file
-// save key and line separated by null bute
-func savemergefile(klns kvallines, fn string, dn string) string {
-	bn := filepath.Base(fn)
-	pfn := filepath.Join(dn, bn)
-	fp, err := os.OpenFile(pfn, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer fp.Close()
-
-	for _, kln := range klns {
-
-		var n = byte(0)
-		knl := string(kln.key) + string(n) + string(kln.line)
-
-		_, err := fp.Write([]byte(knl))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return fn
-}
-
-// bufSplit(buf, reclen)
-//
-// split the buffer into a slice containing reclen records
-func bufSplit(buf []byte, reclen int) lines {
-	buflen := len(buf)
-	var lns lines
-	for o := 0; o < buflen; o += reclen {
-		rec := buf[o : o+reclen-1]
-		lns = append(lns, rec)
-	}
-	return lns
-}
 
 // sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
 func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
@@ -98,7 +56,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	return klns, dn, nil
 }
 
-func sortfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
+func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
 	if reclen > 0 {
 		sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
 	}
@@ -140,8 +98,20 @@ func sortfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int)
 
 func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo int) {
 
+	var klns kvallines
+	var err error
 	if len(fns) == 0 {
-		klns, _, err := sortfile("", "", reclen, keyoff, keylen, lpo)
+		if reclen != 0 {
+			klns, _, err = sortflrecfile("", "", reclen, keyoff, keylen, lpo)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			klns, _, err = sortvlrecfile("", "", reclen, keyoff, keylen, lpo)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -164,7 +134,17 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 		return
 	}
 	if len(fns) == 1 {
-		klns, _, err := sortfile(fns[0], "", reclen, keyoff, keylen, lpo)
+		if reclen != 0 {
+			klns, _, err = sortflrecfile(fns[0], "", reclen, keyoff, keylen, lpo)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			klns, _, err = sortvlrecfile(fns[0], "", reclen, keyoff, keylen, lpo)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 		if err != nil {
 			if err == io.EOF {
 				return
@@ -194,7 +174,17 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 		log.Fatal(err)
 	}
 	for _, fn := range fns {
-		_, dn, err = sortfile(fn, dn, reclen, keyoff, keylen, lpo)
+		if reclen != 0 {
+			_, dn, err = sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			_, dn, err = sortvlrecfile(fn, dn, reclen, keyoff, keylen, lpo)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 		if err != nil {
 			if err == io.EOF {
 				continue
