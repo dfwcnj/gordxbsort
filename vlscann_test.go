@@ -43,6 +43,15 @@ func Test_vlscann(t *testing.T) {
 	}
 	log.Println(fn, " file pointer  rewound")
 	klns, _, err = vlscann(fp, 0, 0, 0, 0)
+	for _, kln := range klns {
+		if len(kln.line) == 0 {
+			log.Fatal("vlscann len(kln.line) == 0")
+		}
+		if len(kln.key) != len(kln.line) {
+			log.Fatal("vlscann len(kln.key) != len(kln.line)")
+		}
+		//log.Print(string(kln.line))
+	}
 	if len(klns) != int(lpo) {
 		log.Fatal("vlscann: expected ", lpo, " got ", len(klns))
 	}

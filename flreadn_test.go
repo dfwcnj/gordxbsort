@@ -53,6 +53,15 @@ func Test_flreadn(t *testing.T) {
 
 	//klns, offset, err = flreadn(fp, offset, int(l), 0, 0, int(lpo))
 	klns, offset, err = flreadn(fp, offset, int(l)+1, 0, 0, 0)
+	for _, kln := range klns {
+		if len(kln.line) != int(l)+1 {
+			log.Fatal("kln.line ", kln.line, " len ", len(kln.line))
+		}
+		if len(kln.key) != len(kln.line) {
+			log.Fatal("kln.key ", kln.line, " len ", len(kln.line))
+		}
+		//log.Print(string(kln.line))
+	}
 	if len(klns) != int(lpo) {
 		log.Fatal("flreadn: expected ", lpo, " got ", len(klns))
 	}

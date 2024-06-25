@@ -21,10 +21,6 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 
 	var klns kvallines
 	var nr int // number records read
-	buf := make([]byte, reclen)
-	if lpo != 0 {
-		buf = make([]byte, reclen*lpo)
-	}
 	var bl int
 	var err error
 
@@ -47,6 +43,7 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 		}
 	}
 	if lpo != 0 {
+		buf := make([]byte, reclen*lpo)
 		if bl, err = io.ReadFull(fp, buf); err != nil {
 			if err != io.EOF {
 				log.Fatal("flreadn: ", err)
@@ -68,6 +65,7 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 		return klns, int64(bl / reclen), nil
 	}
 	for {
+		buf := make([]byte, reclen)
 		if bl, err = io.ReadFull(fp, buf); err != nil {
 			if err == io.EOF {
 				log.Println("flreadn returning ", nr, " err ", err)
@@ -82,7 +80,7 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 		var kln kvalline
 		// to avoid having to make buf in the loop
 		// mistake??
-		copy(kln.line, buf)
+		kln.line = buf
 		kln.key = kln.line
 		if keyoff != 0 {
 			kln.key = kln.line[keyoff:]
