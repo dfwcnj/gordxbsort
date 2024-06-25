@@ -1,11 +1,10 @@
 package main
 
-const THRESHOLD int = 1 << 5
+import (
+	"log"
+)
 
-// kvalline key will become a generated key in some instances
-// in others, it will be a subslice of line
-//type line []byte
-//type lines []line
+const THRESHOLD int = 1 << 5
 
 type kvalline struct {
 	key  []byte
@@ -13,63 +12,86 @@ type kvalline struct {
 }
 type kvallines []kvalline
 
-func binsertionsort(klns kvallines) {
+func binsertionsort(klns kvallines) kvallines {
 	n := len(klns)
 	if n == 1 {
-		return
+		return klns
 	}
-	for i := 0; i < len(klns); i++ {
+	for i := 0; i < n; i++ {
 		for j := i; j > 0 && string(klns[j-1].key) > string(klns[j].key); j-- {
 			klns[j], klns[j-1] = klns[j-1], klns[j]
 		}
 	}
+	return klns
 }
 
 // bostic
-func klrsort2a(klns kvallines, recix int) {
+func klrsort2a(klns kvallines, recix int) kvallines {
 	var piles = make([]kvallines, 256)
 	var nc int
+	var li int
+	nl := len(klns)
+	pilelen := make([]int, 256)
 
-	if len(klns) == 0 {
-		return
+	if nl == 0 {
+		log.Fatal("klrsort2a: 0 len lines: ", recix)
 	}
-	if len(klns) < THRESHOLD {
-		binsertionsort(klns)
-		return
+	if nl < THRESHOLD {
+		return binsertionsort(klns)
 	}
 
-	for _, l := range klns {
+	for i, _ := range klns {
 
-		if recix >= len(l.key) {
+		if recix >= len(klns[i].key) {
 			continue
 		}
 
-		// aooend kvalline to the pile indexed by c
-		c := int(l.key[recix])
-		piles[int(c)] = append(piles[int(c)], l)
+		// append kvalline to the pile indexed by c
+		c := int(klns[i].key[recix])
+		piles[int(c)] = append(piles[c], klns[i])
 		if len(piles[c]) == 1 {
 			nc++ // number of piles so far
 		}
+		li = c
+	}
+	if nc == 1 {
+		return binsertionsort(piles[li])
 	}
 
-	for _, p := range piles {
-		if len(p) == 0 {
+	for i, _ := range piles {
+		if len(piles[i]) == 0 {
 			continue
 		}
+		pilelen[i] = len(piles[i])
 		// sort pile
-		klrsort2a(p, recix+1)
+		if len(piles[i]) < THRESHOLD {
+			piles[i] = binsertionsort(piles[i])
+			if len(piles[i]) != pilelen[i] {
+				log.Fatal("pilelen[", i, "] ", pilelen[i], "len(piles[i]) ", len(piles[i]))
+			}
+		} else {
+			piles[i] = klrsort2a(piles[i], recix+1)
+			if len(piles[i]) != pilelen[i] {
+				log.Fatal("pilelen[", i, "] ", pilelen[i], "len(piles[i]) ", len(piles[i]))
+			}
+		}
 		nc--
 		if nc == 0 {
 			break
 		}
 	}
-	clear(klns)
-	for _, p := range piles {
-		if len(p) == 0 {
-			continue
+
+	var slns kvallines
+	for i, _ := range piles {
+		if len(piles[i]) != pilelen[i] {
+			log.Fatal("pilelen[", i, "] ", pilelen[i], "len(piles[i]) ", len(piles[i]))
 		}
-		for _, l := range p {
-			klns = append(klns, l)
+		for j, _ := range piles[i] {
+			slns = append(slns, piles[i][j])
 		}
 	}
+	if len(slns) != nl {
+		log.Fatal("slns: ", len(slns), " nl ", nl)
+	}
+	return slns
 }

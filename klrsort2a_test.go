@@ -12,50 +12,54 @@ import (
 //}
 //type kvallines []kvalline
 
-func Test_rsort2a(t *testing.T) {
+func Test_klrsort2a(t *testing.T) {
 
-	var klns kvallines
 	var l uint = 32
-	ls := []uint{1, 2, 1<<4, 1<<8, 1<<16, 1<<20, 1<<24}
+	ls := []uint{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
 
-	for _, i := range ls {
+	for _, nl := range ls {
 
-		var kln kvalline
+		var klns kvallines
 
-		log.Print("testing sort of ", i)
-		rsl := randomstrings(i, l)
-		if len(rsl) != int(i) {
-			log.Fatal("rsl: wanted len ", i, " got ", len(rsl))
+		log.Print("testing sort of ", nl)
+		rsl := randomstrings(nl, l)
+		if len(rsl) != int(nl) {
+			log.Fatal("rsl: wanted len ", nl, " got ", len(rsl))
 		}
-		klns = klns[:0]
 		for _, s := range rsl {
+			var kln kvalline
 			bln := []byte(s)
 			kln.line = bln
 			kln.key = kln.line
 			klns = append(klns, kln)
 		}
-		if len(klns) != int(i) {
+		if len(klns) != int(nl) {
 			log.Print(klns)
-			log.Fatal("klns: before sort wanted len ", i, " got ", len(klns))
+			log.Fatal("klns: before sort wanted len ", nl, " got ", len(klns))
 		}
-		klrsort2a(klns, 0)
-		if len(klns) != int(i) {
-			log.Print(klns)
-			log.Fatal("klns: after sort wanted len ", i, " got ", len(klns))
+		slns := klrsort2a(klns, 0)
+		if len(slns) != int(nl) {
+			log.Print(slns)
+			log.Fatal("slns: after sort wanted len ", nl, " got ", len(slns))
 		}
 
 		var ssl []string
-		for _, s := range klns {
+		for _, s := range slns {
 			ssl = append(ssl, string(s.line))
 		}
-		if len(ssl) != int(i) {
+		if len(ssl) != int(nl) {
 			log.Print(ssl)
-			log.Fatal("ssl: wanted len ", i, " got ", len(ssl))
+			log.Fatal("ssl: wanted len ", nl, " got ", len(ssl))
+		}
+		for i, _ := range ssl {
+			if len(ssl[i]) != int(l) {
+				log.Fatal("ssl[i]: wanted len ", l, " got ", len(ssl[i]))
+			}
 		}
 		if !sort.StringsAreSorted(ssl) {
-			t.Error("rsort2a failed for size ", i)
+			t.Error("rsort2a failed for size ", nl)
 		} else {
-			log.Print("sort test passed for ", i)
+			log.Print("sort test passed for ", nl)
 		}
 	}
 }

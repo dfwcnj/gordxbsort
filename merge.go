@@ -25,7 +25,7 @@ func savemergefile(klns kvallines, fn string, dn string) string {
 	for _, kln := range klns {
 
 		var n = byte(0)
-		knl := string(kln.key) + string(n) + string(kln.line)
+		knl := string(kln.key) + string(n) + string(kln.line) + "\n"
 
 		_, err := fp.Write([]byte(knl))
 		if err != nil {
