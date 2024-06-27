@@ -36,7 +36,6 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 		_, err := fp.Seek(offset, 0)
 		if err != nil {
 			if err == io.EOF {
-				log.Println("flreadn returning ", nr, " at ", offset)
 				return klns, 0, err
 			}
 			log.Fatal("flreadn: ", err)
@@ -61,20 +60,17 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 			klns = append(klns, kln)
 			nr++
 		}
-		log.Println("flreadn lpo returning ", nr, " at ", bl)
 		return klns, int64(bl / reclen), nil
 	}
 	for {
 		buf := make([]byte, reclen)
 		if bl, err = io.ReadFull(fp, buf); err != nil {
 			if err == io.EOF {
-				log.Println("flreadn returning ", nr, " err ", err)
 				return klns, 0, err
 			}
 			log.Fatal("flreadn: ", err)
 		}
 		if bl == 0 {
-			log.Println("flreadn returning ", nr, " bl ", bl)
 			return klns, 0, err
 		}
 		var kln kvalline
@@ -95,7 +91,6 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 			if err != nil {
 				log.Fatal("flreadn: ", err)
 			}
-			log.Println("flreadn returning ", nr, " lpo ", lpo)
 			return klns, offset, nil
 		}
 	}
@@ -119,7 +114,6 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 		_, err := fp.Seek(offset, 0)
 		if err != nil {
 			if err == io.EOF {
-				log.Println("vlscanner return ", nr, " at ", offset)
 				return klns, 0, err
 			}
 			log.Fatal("vlscann", err)
@@ -150,7 +144,6 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 			if err != nil {
 				log.Fatal("vlscann: ", err)
 			}
-			log.Println("vlscanner return ", nr)
 			return klns, offset, nil
 		}
 	}
@@ -158,7 +151,6 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 	if err != nil {
 		log.Fatal("vlscann: ", err)
 	}
-	log.Println("vlscanner return ", nr)
 	return klns, offset, nil
 
 }

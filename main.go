@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type line []byte
@@ -15,6 +17,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	var klns kvallines
 	var offset int64
 	var err error
+	var i int
 
 	fp := os.Stdin
 	if fn != "" {
@@ -31,16 +34,19 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 		if offset == 0 || err == io.EOF {
 			return sklns, dn, err
 		}
+
 		if dn == "" {
 			dn, err = os.MkdirTemp("", "sort")
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
-		mfn := savemergefile(sklns, fn, dn)
-		if mfn == "" {
+		mfn := filepath.Join(dn, fmt.Sprintf("%s%d", fn, i))
+
+		if savemergefile(sklns, mfn) == "" {
 			log.Fatal("savemergefile failed: ", fn, " ", dn)
 		}
+		i++
 
 	}
 	//return klns, dn, nil
@@ -50,6 +56,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	var offset int64
 	var klns kvallines
 	var err error
+	var i int
 
 	fp := os.Stdin
 	if fn != "" {
@@ -65,16 +72,19 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 		if offset == 0 || err == io.EOF {
 			return sklns, dn, err
 		}
+
 		if dn == "" {
 			dn, err = os.MkdirTemp("", "sort")
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
-		mfn := savemergefile(sklns, fn, dn)
-		if mfn == "" {
+		mfn := filepath.Join(dn, fmt.Sprintf("%s%d", fn, i))
+
+		if savemergefile(sklns, mfn) == "" {
 			log.Fatal("savemergefile failed: ", fn, " ", dn)
 		}
+		i++
 
 	}
 	//return klns, dn, nil

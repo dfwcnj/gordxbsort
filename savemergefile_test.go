@@ -1,20 +1,19 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
-//type kvalline struct {
-//	key  []byte
-//	line []byte
-//}
-
 func Test_savemergefile(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 8
-	var dn = "/private/tmp"
+	var lpo uint = 1 << 16
+	var dn = os.TempDir()
 
 	for i := range 10 {
 		var klns kvallines
@@ -33,7 +32,30 @@ func Test_savemergefile(t *testing.T) {
 		}
 
 		slns := klrsort2a(klns, 0)
-		var fn = fmt.Sprint("file", i)
-		savemergefile(slns, fn, dn)
+		var fn = filepath.Join(dn, fmt.Sprint("file", i))
+		savemergefile(slns, fn)
+
+		fp, err := os.Open(fn)
+		if err != nil {
+			log.Fatal(err)
+		}
+		scanner := bufio.NewScanner(fp)
+		var rlns []string
+		for scanner.Scan() {
+			l := scanner.Text()
+			if len(l) == 0 {
+				continue
+			}
+			var sep = make([]byte, 1)
+			sa := strings.Split(l, string(sep))
+			if len(sa) != 2 {
+				log.Fatal("split ", l, " wanted ", 2, " got ", len(sa))
+			}
+			rlns = append(rlns, sa[1])
+		}
+		if len(rlns) != int(lpo) {
+			log.Fatal("rlns wanted ", lpo, " got ", len(rlns))
+		}
+		log.Print("savemergefile test passed")
 	}
 }

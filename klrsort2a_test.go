@@ -47,6 +47,9 @@ func Test_klrsort2a(t *testing.T) {
 		for _, s := range slns {
 			ssl = append(ssl, string(s.line))
 		}
+		if len(ssl) != 1 && ssl[0] == ssl[len(ssl)-1] {
+			log.Fatal("strings are all equal")
+		}
 		if len(ssl) != int(nl) {
 			log.Print(ssl)
 			log.Fatal("ssl: wanted len ", nl, " got ", len(ssl))
