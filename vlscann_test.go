@@ -22,7 +22,7 @@ func Test_vlscann(t *testing.T) {
 
 	rsl := randomstrings(lpo, l)
 	td := os.TempDir()
-	fn := path.Join(td, "rtxt.txt")
+	fn := path.Join(td, "rdxsort", "rtxt.txt")
 
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {

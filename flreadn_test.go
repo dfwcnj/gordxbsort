@@ -26,7 +26,12 @@ func Test_flreadn(t *testing.T) {
 	log.Println("rsl ", len(rsl))
 
 	td := os.TempDir()
-	fn := path.Join(td, "rtxt.txt")
+	dn := path.Join(td, "rdxsort")
+	err = os.Mkdir(dn, 0755)
+	if err != nil && !os.IsExist(err) {
+		log.Fatal(err)
+	}
+	fn := path.Join(dn, "rtxt.txt")
 
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {

@@ -52,6 +52,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	//return klns, dn, nil
 }
 
+// sort variable lengh records file
 func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
 	var offset int64
 	var klns kvallines
@@ -166,11 +167,12 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 
 		return
 	}
-	dn, err := os.MkdirTemp("", "sort")
+	dn, err := initmergedir("rdxsort")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, fn := range fns {
+		var i 
 		log.Printf("sortfiles fn %s\n", fn)
 		if reclen != 0 {
 			klns, dn, err = sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
@@ -189,8 +191,11 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 			}
 			log.Fatal(err)
 		}
+		mfn := fmt.Sprintf("%s%d", filepath.Base(fn), n)
+		mpath := filepath.join(dn, mfn)
+		savemergefile(klns, mpath)
 	}
-	mergefiles(dn, lpo)
+	mergefiles(ofn, dn, lpo)
 }
 
 func main() {

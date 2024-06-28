@@ -11,7 +11,8 @@ import (
 func Test_klchan(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 16
-	var dn = os.TempDir()
+	var td = os.TempDir()
+	dn := filepath.Join(td, "rdxsort")
 
 	log.Print("klchan test")
 	for i := range 1 {
