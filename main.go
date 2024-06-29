@@ -55,7 +55,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	}
 	//clear(klns)
 	//mergefiles("", dn, lpo)
-	return klns, dn, err
+	// return klns, dn, err
 }
 
 // sort variable lengh records file
@@ -222,7 +222,7 @@ func main() {
 	flag.IntVar(&reclen, "reclen", 0, "length of the fixed length record")
 	flag.IntVar(&keyoff, "keyoff", 0, "offset of the key")
 	flag.IntVar(&keylen, "keylen", 0, "length of the key if not whole line")
-	flag.IntVar(&lpo, "lpo", 1<<20, "lines per sort/merge")
+	flag.IntVar(&lpo, "lpo", 0, "lines per sort/merge")
 	flag.Parse()
 	fns = flag.Args()
 
