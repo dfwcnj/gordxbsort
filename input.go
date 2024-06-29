@@ -119,7 +119,12 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 		}
 	}
 
+	n := 1 << 30
+	sbuf := make([]byte, n)
+
 	scanner := bufio.NewScanner(fp)
+	scanner.Buffer(sbuf, n*2)
+
 	for scanner.Scan() {
 		var kln kvalline
 		l := scanner.Text()
