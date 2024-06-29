@@ -91,50 +91,6 @@ func makemergedir(dn string) (string, error) {
 	return mdn, err
 }
 
-func mergefiles(ofn string, dn string, lpo int) {
-	log.Print("multi step merge not implemented")
-	ofp := os.Stdout
-	if ofn != "" {
-		var mpath = filepath.Join(dn, ofn)
-		log.Print("mpath ", mpath)
-		log.Print("opening ", mpath)
-		ofp, err := os.OpenFile(mpath, os.O_RDWR|os.O_CREATE, 0644)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer ofp.Close()
-	}
-	finfs, err := os.ReadDir(dn)
-	if err != nil {
-		log.Fatal("ReadDir ", dn, ": ", err)
-	}
-	pq := make(PriorityQueue, len(finfs))
-	i := 0
-
-	// populate the priority queue
-	for _, finf := range finfs {
-		fn := finf.Name()
-		inch := make(chan kvalline)
-		go klchan(fn, klnullsplit, inch)
-		var nit item
-		nit.kln = <-inch
-		nit.inch = inch
-		nit.index = i
-		pq[i] = &nit
-		i++
-	}
-
-	for pq.Len() > 0 {
-		item := pq.Top().(*item)
-		fmt.Fprint(ofp, item.kln.line)
-		kln, ok := <-item.inch
-		if !ok {
-			_ = heap.Pop(&pq)
-		}
-		pq.update(item, string(kln.line), string(kln.key))
-	}
-}
-
 // save merge file
 // save key and line separated by null bute
 func savemergefile(klns kvallines, fn string) string {
@@ -223,4 +179,49 @@ func klchan(fn string, kg func([]byte) [][]byte, out chan kvalline) {
 		out <- kln
 	}
 	close(out)
+}
+
+func mergefiles(ofn string, dn string, lpo int) {
+	log.Print("multi step merge not implemented")
+
+	finfs, err := os.ReadDir(dn)
+	if err != nil {
+		log.Fatal("ReadDir ", dn, ": ", err)
+	}
+
+	ofp := os.Stdout
+	if ofn != "" {
+		ofp, err = os.OpenFile(ofn, os.O_RDWR|os.O_CREATE, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer ofp.Close()
+	}
+	pq := make(PriorityQueue, len(finfs))
+	i := 0
+
+	// populate the priority queue
+	for _, finf := range finfs {
+		fn := filepath.Join(dn, finf.Name())
+		inch := make(chan kvalline)
+		go klchan(fn, klnullsplit, inch)
+		var nit item
+		nit.kln = <-inch
+		nit.inch = inch
+		nit.index = i
+		pq[i] = &nit
+		i++
+	}
+
+	for pq.Len() > 0 {
+		item := pq.Top().(*item)
+		fmt.Fprintf(ofp, "%s\n", string(item.kln.line))
+
+		kln, ok := <-item.inch
+		if !ok {
+			_ = pq.Pop()
+			continue
+		}
+		pq.update(item, string(kln.line), string(kln.key))
+	}
 }

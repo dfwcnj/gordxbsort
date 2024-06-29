@@ -20,28 +20,32 @@ func Test_vlscann(t *testing.T) {
 
 	var klns kvallines
 
-	rsl := randomstrings(lpo, l)
-	td := os.TempDir()
-	fn := path.Join(td, "rdxsort", "rtxt.txt")
+	log.Print("vlscann test")
 
+	dn, err := initmergedir("rdxsort")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(dn)
+
+	rsl := randomstrings(lpo, l)
+
+	fn := path.Join(dn, "rdxsort", "rtxt.txt")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer fp.Close()
-	log.Println(fn, " created")
 
 	for _, l := range rsl {
 		fmt.Fprintln(fp, l+"\n")
 		nr++
 	}
-	log.Println(fn, " filled ", nr)
 
 	_, err = fp.Seek(0, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(fn, " file pointer  rewound")
 	klns, _, err = vlscann(fp, 0, 0, 0, 0)
 	for _, kln := range klns {
 		if len(kln.line) == 0 {

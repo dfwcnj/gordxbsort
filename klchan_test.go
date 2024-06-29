@@ -11,10 +11,15 @@ import (
 func Test_klchan(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 16
-	var td = os.TempDir()
-	dn := filepath.Join(td, "rdxsort")
 
 	log.Print("klchan test")
+
+	dn, err := initmergedir("rdxsort")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(dn)
+
 	for i := range 1 {
 		var klns kvallines
 		var kln kvalline

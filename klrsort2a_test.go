@@ -14,6 +14,7 @@ import (
 
 func Test_klrsort2a(t *testing.T) {
 
+	log.Print("klrsort2a test")
 	var l uint = 32
 	ls := []uint{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
 
@@ -34,12 +35,10 @@ func Test_klrsort2a(t *testing.T) {
 			klns = append(klns, kln)
 		}
 		if len(klns) != int(nl) {
-			log.Print(klns)
 			log.Fatal("klns: before sort wanted len ", nl, " got ", len(klns))
 		}
 		slns := klrsort2a(klns, 0)
 		if len(slns) != int(nl) {
-			log.Print(slns)
 			log.Fatal("slns: after sort wanted len ", nl, " got ", len(slns))
 		}
 
@@ -51,7 +50,6 @@ func Test_klrsort2a(t *testing.T) {
 			log.Fatal("strings are all equal")
 		}
 		if len(ssl) != int(nl) {
-			log.Print(ssl)
 			log.Fatal("ssl: wanted len ", nl, " got ", len(ssl))
 		}
 		for i, _ := range ssl {

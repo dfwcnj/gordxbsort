@@ -13,8 +13,13 @@ import (
 func Test_savemergefile(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 16
-	var td = os.TempDir()
-	dn := filepath.Join(td, "rdxsort")
+
+	log.Print("savemergefile test")
+	dn, err := initmergedir("rdxsort")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(dn)
 
 	for i := range 10 {
 		var klns kvallines
@@ -40,6 +45,8 @@ func Test_savemergefile(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer fp.Close()
+
 		scanner := bufio.NewScanner(fp)
 		var rlns []string
 		for scanner.Scan() {

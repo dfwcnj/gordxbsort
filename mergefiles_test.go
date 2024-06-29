@@ -14,10 +14,15 @@ func Test_mergefiles(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 16
 	var nmf = 10
-	var td = os.TempDir()
-	dn := filepath.Join(td, "rdxsort")
 
-	log.Print("mergefiles test ", dn)
+	log.Print("mergefiles test")
+
+	dn, err := initmergedir("rdxsort")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(dn)
+	log.Print("mergefiles test dn: ", dn)
 
 	for i := range nmf {
 		var klns kvallines
@@ -37,17 +42,19 @@ func Test_mergefiles(t *testing.T) {
 		slns := klrsort2a(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("file", i))
 		savemergefile(slns, fn)
-
 	}
 
-	mfn := "mergefile.txt"
-	mergefiles(mfn, dn, int(lpo))
-
+	mfn := "mergeout.txt"
 	mpath := filepath.Join(dn, mfn)
+	log.Print("merge file name ", mpath)
+	mergefiles(mpath, dn, int(lpo))
+
 	mfp, err := os.Open(mpath)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer mfp.Close()
+
 	scanner := bufio.NewScanner(mfp)
 	var mlns []string
 	for scanner.Scan() {
@@ -58,7 +65,7 @@ func Test_mergefiles(t *testing.T) {
 		log.Fatal("mergefiles n wanted ", int(lpo)*nmf, " got ", len(mlns))
 	}
 	if !slices.IsSorted(mlns) {
-		log.Fatal("lines in ", mfn, "not in sort order")
+		log.Fatal("lines in ", mfn, " not in sort order")
 	}
 
 }
