@@ -15,7 +15,7 @@ import (
 
 func Test_vlscann(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 16
+	var lpo uint = 1 << 20
 	var nr int
 
 	var klns kvallines
@@ -30,7 +30,7 @@ func Test_vlscann(t *testing.T) {
 
 	rsl := randomstrings(lpo, l)
 
-	fn := path.Join(dn, "rdxsort", "rtxt.txt")
+	fn := path.Join(dn, "rtxt.txt")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)

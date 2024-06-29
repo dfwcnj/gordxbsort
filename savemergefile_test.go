@@ -12,7 +12,7 @@ import (
 
 func Test_savemergefile(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 16
+	var lpo uint = 1 << 20
 
 	log.Print("savemergefile test")
 	dn, err := initmergedir("rdxsort")
@@ -64,6 +64,6 @@ func Test_savemergefile(t *testing.T) {
 		if len(rlns) != int(lpo) {
 			log.Fatal("rlns wanted ", lpo, " got ", len(rlns))
 		}
-		log.Print("savemergefile test passed")
 	}
+	log.Print("savemergefile test passed")
 }

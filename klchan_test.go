@@ -10,7 +10,7 @@ import (
 
 func Test_klchan(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 16
+	var lpo uint = 1 << 20
 
 	log.Print("klchan test")
 

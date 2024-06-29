@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"container/heap"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -181,22 +182,52 @@ func klchan(fn string, kg func([]byte) [][]byte, out chan kvalline) {
 	close(out)
 }
 
-func mergefiles(ofn string, dn string, lpo int) {
-	log.Print("multi step merge not implemented")
-
-	finfs, err := os.ReadDir(dn)
-	if err != nil {
-		log.Fatal("ReadDir ", dn, ": ", err)
+func iteminsertionsort(items []item) []item {
+	n := len(items)
+	if n == 1 {
+		return items
 	}
-
-	ofp := os.Stdout
-	if ofn != "" {
-		ofp, err = os.OpenFile(ofn, os.O_RDWR|os.O_CREATE, 0644)
-		if err != nil {
-			log.Fatal(err)
+	for i := 0; i < n; i++ {
+		for j := i; j > 0 && string(items[j-1].kln.key) > string(items[j].kln.key); j-- {
+			items[j], items[j-1] = items[j-1], items[j]
 		}
-		defer ofp.Close()
 	}
+	return items
+}
+
+func insemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
+	var items = make([]item, 0)
+
+	// populate the priority queue
+	for _, finf := range finfs {
+
+		fn := filepath.Join(dn, finf.Name())
+		var itm item
+
+		inch := make(chan kvalline)
+		go klchan(fn, klnullsplit, inch)
+
+		itm.kln = <-inch
+		itm.inch = inch
+		items = append(items, itm)
+	}
+
+	for len(items) > 0 {
+		items = iteminsertionsort(items)
+
+		fmt.Fprintf(ofp, "%s\n", string(items[0].kln.line))
+
+		kln, ok := <-items[0].inch
+		if !ok {
+			items = items[1:]
+			continue
+		}
+		items[0].kln.key = kln.key
+		items[0].kln.line = kln.line
+	}
+}
+
+func pqemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
 	pq := make(PriorityQueue, len(finfs))
 	i := 0
 
@@ -224,4 +255,25 @@ func mergefiles(ofn string, dn string, lpo int) {
 		}
 		pq.update(item, string(kln.line), string(kln.key))
 	}
+}
+
+func mergefiles(ofn string, dn string, lpo int) {
+	log.Print("multi step merge not implemented")
+
+	finfs, err := os.ReadDir(dn)
+	if err != nil {
+		log.Fatal("ReadDir ", dn, ": ", err)
+	}
+
+	ofp := os.Stdout
+	if ofn != "" {
+		ofp, err = os.OpenFile(ofn, os.O_RDWR|os.O_CREATE, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer ofp.Close()
+	}
+
+	insemit(ofp, dn, finfs)
+	//pqemit(ofp, dn, finfs)
 }

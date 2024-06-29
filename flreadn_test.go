@@ -15,7 +15,7 @@ import (
 
 func Test_flreadn(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 16
+	var lpo uint = 1 << 20
 
 	var klns kvallines
 	var offset int64
@@ -23,7 +23,6 @@ func Test_flreadn(t *testing.T) {
 	var nr int
 
 	rsl := randomstrings(lpo, l)
-	log.Println("flreadn test rsl len ", len(rsl))
 
 	dn, err := initmergedir("rdxsort")
 	if err != nil {

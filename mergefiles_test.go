@@ -12,7 +12,7 @@ import (
 
 func Test_mergefiles(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 16
+	var lpo uint = 1 << 20
 	var nmf = 10
 
 	log.Print("mergefiles test")
@@ -22,7 +22,6 @@ func Test_mergefiles(t *testing.T) {
 		log.Fatal(err)
 	}
 	defer os.RemoveAll(dn)
-	log.Print("mergefiles test dn: ", dn)
 
 	for i := range nmf {
 		var klns kvallines
@@ -46,7 +45,6 @@ func Test_mergefiles(t *testing.T) {
 
 	mfn := "mergeout.txt"
 	mpath := filepath.Join(dn, mfn)
-	log.Print("merge file name ", mpath)
 	mergefiles(mpath, dn, int(lpo))
 
 	mfp, err := os.Open(mpath)
@@ -67,5 +65,6 @@ func Test_mergefiles(t *testing.T) {
 	if !slices.IsSorted(mlns) {
 		log.Fatal("lines in ", mfn, " not in sort order")
 	}
+	log.Print("mergefiles test passed")
 
 }

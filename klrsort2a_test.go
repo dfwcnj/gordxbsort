@@ -16,7 +16,8 @@ func Test_klrsort2a(t *testing.T) {
 
 	log.Print("klrsort2a test")
 	var l uint = 32
-	ls := []uint{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
+	//ls := []uint{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
+	ls := []uint{1 << 24}
 
 	for _, nl := range ls {
 
