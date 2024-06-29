@@ -138,10 +138,6 @@ func klnullsplit(bln []byte) [][]byte {
 	var sep = make([]byte, 1)
 	// split on null byte
 	bls = bytes.Split(bln, sep)
-	// there can be only one
-	if len(bls) != 2 {
-		log.Println("klnullsplit wanted ", 2, " got ", len(bls), " parts")
-	}
 	return bls
 }
 
@@ -264,6 +260,7 @@ func mergefiles(ofn string, dn string, lpo int) {
 	if err != nil {
 		log.Fatal("ReadDir ", dn, ": ", err)
 	}
+	//log.Println("mergefiles dn ", dn)
 
 	ofp := os.Stdout
 	if ofn != "" {

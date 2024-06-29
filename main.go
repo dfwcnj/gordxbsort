@@ -23,20 +23,19 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	if fn != "" {
 		fp, err = os.Open(fn)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("sortflrecfile ", err)
 		}
 	}
+
+	log.Println("sortflrecfile")
 
 	for {
 
 		klns, offset, err = flreadn(fp, offset, reclen, keyoff, keylen, lpo)
 		sklns := klrsort2a(klns, 0)
 
-		if err == io.EOF {
-			if offset != 0 {
-				break
-			}
-			return sklns, dn, err
+		if offset == 0 {
+			return sklns, "", err
 		}
 
 		// probably sorting a singleton
@@ -46,7 +45,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 				log.Fatal(err)
 			}
 		}
-		mfn := filepath.Join(dn, fmt.Sprintf("%s%d", fn, i))
+		mfn := filepath.Join(dn, filepath.Base(fmt.Sprintf("%s%d", fn, i)))
 
 		if savemergefile(sklns, mfn) == "" {
 			log.Fatal("savemergefile failed: ", fn, " ", dn)
@@ -70,19 +69,21 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	if fn != "" {
 		fp, err = os.Open(fn)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("sortvlrecfile ", err)
 		}
 	}
 
 	for {
 		klns, offset, err = vlscann(fp, offset, keyoff, keylen, lpo)
+
+		if err != nil {
+			log.Fatal("sortvlrecfile after vlscann ", fn, " ", err)
+		}
+
 		sklns := klrsort2a(klns, 0)
 
-		if err == io.EOF {
-			if offset != 0 {
-				break
-			}
-			return sklns, dn, err
+		if offset == 0 {
+			return sklns, "", err
 		}
 
 		// probably sorting a singleton
@@ -92,17 +93,13 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 				log.Fatal(err)
 			}
 		}
-		mfn := filepath.Join(dn, fmt.Sprintf("%s%d", fn, i))
-
+		mfn := filepath.Join(dn, filepath.Base(fmt.Sprintf("%s%d", fn, i)))
 		if savemergefile(sklns, mfn) == "" {
 			log.Fatal("savemergefile failed: ", fn, " ", dn)
 		}
 		i++
 
 	}
-	//clear(klns)
-	//mergefiles("", dn, lpo)
-	return klns, dn, err
 }
 
 func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo int) {
@@ -110,7 +107,7 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 	var klns kvallines
 	var dn string
 	var err error
-	log.Printf("sortfiles reclen %d\n", reclen)
+	// log.Printf("sortfiles ofn %s\n", ofn)
 
 	if len(fns) == 0 {
 		if reclen != 0 {
@@ -191,33 +188,25 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 		log.Fatal(err)
 	}
 	defer os.RemoveAll(dn)
+	// log.Print("sortfiles dn ", dn)
 
-	for n, fn := range fns {
-		log.Printf("sortfiles fn %s\n", fn)
+	for _, fn := range fns {
 		var klns kvallines
 		var d string
-		var err error
 		if reclen != 0 {
+			log.Println("sortfiles fn reclen ", fn, " ", reclen)
 			klns, d, err = sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
-			if err != nil && err != io.EOF {
-				log.Fatal(err)
-			}
-			// merge files already saved
 			if d != "" {
 				continue
 			}
 		} else {
 			klns, d, err = sortvlrecfile(fn, dn, reclen, keyoff, keylen, lpo)
-			if err != nil && err != io.EOF {
-				log.Fatal(err)
-			}
-			// merge files already saved
 			if d != "" {
 				continue
 			}
 		}
 
-		mfn := fmt.Sprintf("%s%d", filepath.Base(fn), n)
+		mfn := fmt.Sprintf("%s", filepath.Base(fn))
 		mpath := filepath.Join(dn, mfn)
 		savemergefile(klns, mpath)
 	}

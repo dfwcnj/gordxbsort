@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -60,41 +61,44 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lpo 
 			klns = append(klns, kln)
 			nr++
 		}
-		return klns, int64(bl / reclen), nil
-	}
-	for {
-		buf := make([]byte, reclen)
-		if bl, err = io.ReadFull(fp, buf); err != nil {
-			if err == io.EOF {
-				return klns, 0, err
-			}
-			log.Fatal("flreadn: ", err)
+		if nr < lpo {
+			return klns, 0, nil
+		} else {
+			return klns, int64(bl / reclen), errors.New("flreadn lpo")
 		}
-		if bl == 0 {
-			return klns, 0, err
-		}
-		var kln kvalline
-		// to avoid having to make buf in the loop
-		// mistake??
-		kln.line = buf
-		kln.key = kln.line
-		if keyoff != 0 {
-			kln.key = kln.line[keyoff:]
-			if keylen != 0 {
-				kln.key = kln.line[keyoff : keyoff+keylen]
-			}
-		}
-		klns = append(klns, kln)
-		nr++
-		if lpo > 0 && nr >= lpo {
-			offset, err := fp.Seek(0, 1)
-			if err != nil {
+	} else {
+		for {
+			buf := make([]byte, reclen)
+			if bl, err = io.ReadFull(fp, buf); err != nil {
+				if err == io.EOF {
+					return klns, 0, err
+				}
 				log.Fatal("flreadn: ", err)
 			}
-			return klns, offset, nil
+			if bl == 0 {
+				return klns, 0, err
+			}
+			var kln kvalline
+			// to avoid having to make buf in the loop
+			// mistake??
+			bls := klnullsplit(buf)
+			if len(bls) == 2 {
+				kln.key = bls[0]
+				kln.line = bls[1]
+			} else {
+				kln.line = buf
+				kln.key = kln.line
+			}
+			if keyoff != 0 {
+				kln.key = kln.line[keyoff:]
+				if keylen != 0 {
+					kln.key = kln.line[keyoff : keyoff+keylen]
+				}
+			}
+			klns = append(klns, kln)
+			nr++
 		}
 	}
-
 }
 
 func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvallines, int64, error) {
@@ -102,11 +106,6 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 	var klns kvallines
 	var nr int // number records read
 
-	// offset, err := fp.Seek(0, 1)
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-	// log.Printf("vlscann: %s at %d\n", fp.Name(), offset)
 	if offset != 0 {
 		if fp.Name() == "/dev/stdin" {
 			log.Fatal("vlscann(stdin) offset ", offset)
@@ -119,6 +118,7 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 			log.Fatal("vlscann", err)
 		}
 	}
+
 	scanner := bufio.NewScanner(fp)
 	for scanner.Scan() {
 		var kln kvalline
@@ -128,9 +128,14 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 		}
 
 		bln := []byte(l)
-
-		kln.line = bln
-		kln.key = bln
+		bls := klnullsplit(bln)
+		if len(bls) == 2 {
+			kln.key = bls[0]
+			kln.line = bls[1]
+		} else {
+			kln.line = bln
+			kln.key = bln
+		}
 		if keyoff != 0 {
 			kln.key = kln.line[keyoff:]
 			if keylen != 0 {
@@ -142,15 +147,15 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, lpo int) (kvalli
 		if lpo != 0 && nr >= lpo {
 			offset, err := fp.Seek(0, 1)
 			if err != nil {
-				log.Fatal("vlscann: ", err)
+				log.Fatal("vlscann Seek ", err)
 			}
-			return klns, offset, nil
+			return klns, offset, errors.New("vlscann lpo")
 		}
 	}
-	offset, err := fp.Seek(0, 1)
-	if err != nil {
-		log.Fatal("vlscann: ", err)
+	e := scanner.Err()
+	if e != nil {
+		log.Fatal("vlscann: ", e)
 	}
-	return klns, offset, nil
+	return klns, 0, nil
 
 }
