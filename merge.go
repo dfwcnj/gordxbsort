@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"container/heap"
 	"fmt"
 	"io/fs"
 	"log"
@@ -16,59 +15,6 @@ type item struct {
 	kln   kvalline
 	inch  chan kvalline
 	index int
-}
-
-type PriorityQueue []*item
-
-func (pq PriorityQueue) Len() int { return len(pq) }
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	return string(pq[i].kln.key) < string(pq[j].kln.key)
-}
-
-func (pq PriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
-
-// lowest priority item
-func (pq *PriorityQueue) Bottom() any {
-	old := *pq
-	item := old[0]
-	return item
-}
-
-// highest priority item
-func (pq *PriorityQueue) Top() any {
-	old := *pq
-	n := len(*pq)
-	item := old[n-1]
-	return item
-}
-
-func (pq *PriorityQueue) Push(x any) {
-	n := len(*pq)
-	item := x.(*item)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq *PriorityQueue) Pop() any {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	old[n-1] = nil  // avoid memory leak
-	item.index = -1 // for safety
-	*pq = old[0 : n-1]
-	return item
-}
-
-// update modifies the priority and value of an item in the queue.
-func (pq *PriorityQueue) update(item *item, value string, priority string) {
-	item.kln.line = []byte(value)
-	item.kln.key = []byte(priority)
-	heap.Fix(pq, item.index)
 }
 
 func initmergedir(dn string) (string, error) {
@@ -223,36 +169,6 @@ func insemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
 	}
 }
 
-func pqemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
-	pq := make(PriorityQueue, len(finfs))
-	i := 0
-
-	// populate the priority queue
-	for _, finf := range finfs {
-		fn := filepath.Join(dn, finf.Name())
-		inch := make(chan kvalline)
-		go klchan(fn, klnullsplit, inch)
-		var nit item
-		nit.kln = <-inch
-		nit.inch = inch
-		nit.index = i
-		pq[i] = &nit
-		i++
-	}
-
-	for pq.Len() > 0 {
-		item := pq.Top().(*item)
-		fmt.Fprintf(ofp, "%s\n", string(item.kln.line))
-
-		kln, ok := <-item.inch
-		if !ok {
-			_ = pq.Pop()
-			continue
-		}
-		pq.update(item, string(kln.line), string(kln.key))
-	}
-}
-
 func mergefiles(ofn string, dn string, lpo int) {
 	log.Print("multi step merge not implemented")
 
@@ -272,5 +188,4 @@ func mergefiles(ofn string, dn string, lpo int) {
 	}
 
 	insemit(ofp, dn, finfs)
-	//pqemit(ofp, dn, finfs)
 }
