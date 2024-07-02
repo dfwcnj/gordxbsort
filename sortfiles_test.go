@@ -13,6 +13,7 @@ import (
 func Test_sortfiles(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 20
+	var iomem int64 = 1 << 30
 	var nmf = 10
 	var tmpdir = "/tmp"
 
@@ -43,7 +44,7 @@ func Test_sortfiles(t *testing.T) {
 	mfn := "mergeout.txt"
 	mpath := filepath.Join(tmpdir, mfn)
 
-	sortfiles(fns, mpath, 0, 0, 0, 0)
+	sortfiles(fns, mpath, 0, 0, 0, 0, iomem)
 
 	mfp, err := os.Open(mpath)
 	if err != nil {

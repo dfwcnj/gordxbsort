@@ -7,13 +7,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 type line []byte
 type lines []line
 
 // sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
-func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
+func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int, iomem int64) (kvallines, string, error) {
 	var klns kvallines
 	var offset int64
 	var err error
@@ -31,7 +32,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 
 	for {
 
-		klns, offset, err = flreadn(fp, offset, reclen, keyoff, keylen, lpo)
+		klns, offset, err = flreadn(fp, offset, reclen, keyoff, keylen, lpo, iomem)
 		sklns := klrsort2a(klns, 0)
 		//inch := make(chan kvallines, 0)
 		//go cklrsort2a(klns, 0, inch)
@@ -62,7 +63,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 }
 
 // sort variable lengh records file
-func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int) (kvallines, string, error) {
+func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo int, iomem int64) (kvallines, string, error) {
 	var offset int64
 	var klns kvallines
 	var err error
@@ -77,7 +78,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	}
 
 	for {
-		klns, offset, err = vlscann(fp, offset, keyoff, keylen, lpo)
+		klns, offset, err = vlscann(fp, offset, keyoff, keylen, lpo, iomem)
 
 		if err != nil {
 			log.Fatal("sortvlrecfile after vlscann ", fn, " ", err)
@@ -108,7 +109,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	}
 }
 
-func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo int) {
+func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo int, iomem int64) {
 
 	var klns kvallines
 	var dn string
@@ -117,13 +118,13 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 
 	if len(fns) == 0 {
 		if reclen != 0 {
-			klns, dn, err = sortflrecfile("", "", reclen, keyoff, keylen, lpo)
+			klns, dn, err = sortflrecfile("", "", reclen, keyoff, keylen, lpo, iomem)
 			if dn != "" {
 				mergefiles(ofn, dn, lpo)
 				return
 			}
 		} else {
-			klns, dn, err = sortvlrecfile("", "", reclen, keyoff, keylen, lpo)
+			klns, dn, err = sortvlrecfile("", "", reclen, keyoff, keylen, lpo, iomem)
 			if dn != "" {
 				if err != io.EOF {
 					log.Fatal(err)
@@ -156,13 +157,13 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 	if len(fns) == 1 {
 		log.Printf("sortfiles fn %s\n", fns[0])
 		if reclen != 0 {
-			klns, _, err = sortflrecfile(fns[0], "", reclen, keyoff, keylen, lpo)
+			klns, _, err = sortflrecfile(fns[0], "", reclen, keyoff, keylen, lpo, iomem)
 			if dn != "" {
 				mergefiles(ofn, dn, lpo)
 				return
 			}
 		} else {
-			klns, _, err = sortvlrecfile(fns[0], "", reclen, keyoff, keylen, lpo)
+			klns, _, err = sortvlrecfile(fns[0], "", reclen, keyoff, keylen, lpo, iomem)
 			if dn != "" {
 				mergefiles(ofn, dn, lpo)
 				return
@@ -201,12 +202,12 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 		var d string
 		if reclen != 0 {
 			log.Println("sortfiles fn reclen ", fn, " ", reclen)
-			klns, d, err = sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo)
+			klns, d, err = sortflrecfile(fn, dn, reclen, keyoff, keylen, lpo, iomem)
 			if d != "" {
 				continue
 			}
 		} else {
-			klns, d, err = sortvlrecfile(fn, dn, reclen, keyoff, keylen, lpo)
+			klns, d, err = sortvlrecfile(fn, dn, reclen, keyoff, keylen, lpo, iomem)
 			if d != "" {
 				continue
 			}
@@ -219,12 +220,34 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, lpo
 	mergefiles(ofn, dn, lpo)
 }
 
+func parseiomem(iomem string) int64 {
+
+	ns := iomem[0 : len(iomem)-2]
+	n, err := strconv.ParseInt(ns, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ms := iomem[len(iomem)-2:]
+	switch ms {
+	case "kb":
+		return n * 1 << 10
+	case "mb":
+		return n * 1 << 20
+	case "gb":
+		return n * 1 << 30
+	default:
+		log.Fatal("bad iomem argument: ", iomem)
+	}
+	return 0
+}
+
 func main() {
 	var fns []string
-	var ofn string
+	var ofn, iomem string
 	var reclen, keylen, keyoff int
 	var lpo int
 	flag.StringVar(&ofn, "ofn", "", "output file name")
+	flag.StringVar(&iomem, "iomem", "", "max read memory size nMB or nGB")
 	flag.IntVar(&reclen, "reclen", 0, "length of the fixed length record")
 	flag.IntVar(&keyoff, "keyoff", 0, "offset of the key")
 	flag.IntVar(&keylen, "keylen", 0, "length of the key if not whole line")
@@ -232,6 +255,10 @@ func main() {
 	flag.Parse()
 	fns = flag.Args()
 
-	sortfiles(fns, ofn, reclen, keyoff, keylen, lpo)
+	var iom int64
+	if iomem != "" {
+		iom = parseiomem(iomem)
+	}
+	sortfiles(fns, ofn, reclen, keyoff, keylen, lpo, iom)
 
 }

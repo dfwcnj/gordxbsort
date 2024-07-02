@@ -16,6 +16,7 @@ import (
 func Test_flreadn(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 20
+	var iomem int64 = 1 << 30
 
 	var klns kvallines
 	var offset int64
@@ -54,8 +55,8 @@ func Test_flreadn(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	//klns, offset, err = flreadn(fp, offset, int(l), 0, 0, int(lpo))
-	klns, offset, err = flreadn(fp, offset, int(l)+1, 0, 0, 0)
+	//klns, offset, err = flreadn(fp, offset, int(l), 0, 0, int(lpo), iomem)
+	klns, offset, err = flreadn(fp, offset, int(l)+1, 0, 0, 0, iomem)
 	for _, kln := range klns {
 		if len(kln.line) != int(l)+1 {
 			log.Fatal("kln.line ", kln.line, " len ", len(kln.line))

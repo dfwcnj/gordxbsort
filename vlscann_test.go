@@ -16,6 +16,7 @@ import (
 func Test_vlscann(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 20
+	var iomem int64 = 1 << 30
 	var nr int
 
 	var klns kvallines
@@ -46,7 +47,7 @@ func Test_vlscann(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	klns, _, err = vlscann(fp, 0, 0, 0, 0)
+	klns, _, err = vlscann(fp, 0, 0, 0, 0, iomem)
 	for _, kln := range klns {
 		if len(kln.line) == 0 {
 			log.Fatal("vlscann len(kln.line) == 0")

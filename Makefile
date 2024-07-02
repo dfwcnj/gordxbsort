@@ -3,8 +3,7 @@
 .PHONY:fmt vet build
 
 fmt:
-	go fmt main.go
-	go fmt klrsort2a.go
+	go fmt *.go
 
 vet: fmt
 	go vet *.go
