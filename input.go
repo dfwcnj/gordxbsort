@@ -144,6 +144,9 @@ func vlreadall(fp *os.File, offset int64, keyoff int, keylen int, lpo int, iomem
 	}
 	lines := strings.Split(string(buf), "\n")
 	for _, l := range lines {
+		if len(l) == 0 {
+			continue
+		}
 		var kln kvalline
 		bln := []byte(l)
 		bls := klnullsplit(bln)

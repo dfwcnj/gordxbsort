@@ -35,8 +35,10 @@ func Test_sortfiles(t *testing.T) {
 			log.Fatal("sortfiles test before sort wanted len ", l, " got ", len(klns))
 		}
 
+		//log.Println("sorting file", i)
 		slns := klrsort2a(klns, 0)
 		var fn = filepath.Join(tmpdir, fmt.Sprint("file", i))
+		//log.Println("saving file", i)
 		savemergefile(slns, fn)
 		fns = append(fns, fn)
 	}
@@ -44,6 +46,7 @@ func Test_sortfiles(t *testing.T) {
 	mfn := "mergeout.txt"
 	mpath := filepath.Join(tmpdir, mfn)
 
+	log.Println("sorting files to ", mpath)
 	sortfiles(fns, mpath, 0, 0, 0, 0, iomem)
 
 	mfp, err := os.Open(mpath)
