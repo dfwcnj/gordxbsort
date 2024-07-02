@@ -21,5 +21,10 @@ is around 2/3 as fast as BSD sort but with LANG unset, this command is
 arount 1/10 as fast as BSD sort. I haven't investigated the reason, but
 I suspect the use of mmap and pthreads.
 
+I tried making the sort phase concurrent but it only seems to make
+matters worse
+
+i added an iomem argument that is used for input.
+
 I will try over time to improve the test coverage and performance.
 
