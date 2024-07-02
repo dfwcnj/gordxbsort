@@ -4,13 +4,13 @@ import (
 	"log"
 )
 
-const THRESHOLD int = 1 << 5
-
-type kvalline struct {
-	key  []byte
-	line []byte
-}
-type kvallines []kvalline
+//const THRESHOLD int = 1 << 5
+//
+//type kvalline struct {
+//	key  []byte
+//	line []byte
+//}
+//type kvallines []kvalline
 
 func cbinsertionsort(klns kvallines, out chan kvallines) {
 	n := len(klns)
