@@ -32,7 +32,10 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 	for {
 
 		klns, offset, err = flreadn(fp, offset, reclen, keyoff, keylen, lpo)
-		sklns := klrsort2a(klns, 0)
+		//sklns := klrsort2a(klns, 0)
+		inch := make(chan kvallines, 0)
+		go cklrsort2a(klns, 0, inch)
+		sklns := <-inch
 
 		if offset == 0 {
 			return sklns, "", err
@@ -80,7 +83,10 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, lpo
 			log.Fatal("sortvlrecfile after vlscann ", fn, " ", err)
 		}
 
-		sklns := klrsort2a(klns, 0)
+		// sklns := klrsort2a(klns, 0)
+		inch := make(chan kvallines, 0)
+		go cklrsort2a(klns, 0, inch)
+		sklns := <-inch
 
 		if offset == 0 {
 			return sklns, "", err
