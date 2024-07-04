@@ -22,3 +22,5 @@ clean:
 	/bin/rm -f rdxbin *.test
 	/bin/rm -f *.prof *.out
 
+clobber: clean
+	/bin/rm -f *.pdf

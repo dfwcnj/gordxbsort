@@ -47,6 +47,7 @@ func savemergefile(klns kvallines, fn string) string {
 		log.Fatal(err)
 	}
 	defer fp.Close()
+	nw := bufio.NewWriter(fp)
 
 	var n = byte(0)
 
@@ -54,10 +55,15 @@ func savemergefile(klns kvallines, fn string) string {
 
 		knl := string(kln.key) + string(n) + string(kln.line) + "\n"
 
-		_, err := fp.Write([]byte(knl))
+		//_, err := fp.Write([]byte(knl))
+		_, err := nw.WriteString(knl)
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+	err = nw.Flush()
+	if err != nil {
+		log.Fatal(err)
 	}
 	return fn
 }
@@ -154,10 +160,16 @@ func insemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
 		items = append(items, itm)
 	}
 
+	nw := bufio.NewWriter(ofp)
 	for len(items) > 0 {
 		items = iteminsertionsort(items)
 
-		fmt.Fprintf(ofp, "%s\n", string(items[0].kln.line))
+		s := fmt.Sprintf("%s\n", string(items[0].kln.line))
+		_, err := nw.WriteString(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//fmt.Fprintf(ofp, "%s\n", string(items[0].kln.line))
 
 		kln, ok := <-items[0].inch
 		if !ok {
@@ -166,6 +178,10 @@ func insemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
 		}
 		items[0].kln.key = kln.key
 		items[0].kln.line = kln.line
+	}
+	err := nw.Flush()
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
