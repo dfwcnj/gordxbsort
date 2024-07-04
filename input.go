@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"io"
 	"log"
@@ -23,7 +24,7 @@ func flreadall(fp *os.File, offset int64, reclen int, keyoff int, keylen int, lp
 	if err != nil {
 		log.Fatal(err)
 	}
-	var r io.Reader = strings.NewReader(string(buf))
+	var r io.Reader = bytes.NewReader(buf)
 
 	recbuf := make([]byte, reclen)
 	for {

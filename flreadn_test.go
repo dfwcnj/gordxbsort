@@ -23,6 +23,8 @@ func Test_flreadn(t *testing.T) {
 	var err error
 	var nr int
 
+	log.Println("flreadn test")
+
 	rsl := randomstrings(lpo, l)
 
 	dn, err := initmergedir("rdxsort")

@@ -12,8 +12,7 @@ build: vet
 	go build -o rdxbin  main.go klrsort2a.go merge.go input.go
 
 profile:
-	go test -cpuprofile cpu.prof -memprofile mem.prof -mutexprofile mutex.out -bench .
-	# go test -blockprofile block.out -cpuprofile cpu.prof -memprofile mem.prof -mutexprofile mutex.out -bench .
+	go test -cpuprofile cpu.prof -memprofile mem.prof -bench .
 
 test:
 	go test
