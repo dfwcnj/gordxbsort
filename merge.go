@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"container/heap"
 	"fmt"
 	"io/fs"
 	"log"
@@ -15,6 +16,42 @@ type item struct {
 	kln   kvalline
 	inch  chan kvalline
 	index int
+}
+
+type PriorityQueue []*item
+
+func (pq PriorityQueue) Len() int { return len(pq) }
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return bytes.Compare(pq[i].kln.key, pq[j].kln.key) < 0
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
+}
+
+func (pq *PriorityQueue) Push(x interface{}) {
+	n := len(*pq)
+	item := x.(*item)
+	item.index = n
+	*pq = append(*pq, item)
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	item.index = -1 // for safety
+	*pq = old[0 : n-1]
+	return item
+}
+
+func (pq *PriorityQueue) update(item *item, value []byte, priority []byte) {
+	item.kln.line = value
+	item.kln.key = priority
+	heap.Fix(pq, item.index)
 }
 
 func initmergedir(dn string) (string, error) {
@@ -143,6 +180,48 @@ func iteminsertionsort(items []item) []item {
 	return items
 }
 
+func pqemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
+	pq := make(PriorityQueue, len(finfs))
+
+	for i, finf := range finfs {
+		fn := filepath.Join(dn, finf.Name())
+		var itm item
+
+		inch := make(chan kvalline)
+		go klchan(fn, klnullsplit, inch)
+
+		itm.kln = <-inch
+		itm.inch = inch
+		itm.index = i
+		pq[i] = &itm
+	}
+
+	heap.Init(&pq)
+
+	nw := bufio.NewWriter(ofp)
+
+	for pq.Len() > 0 {
+		item := heap.Pop(&pq).(*item)
+		s := fmt.Sprintf("%s\n", string(item.kln.line))
+		_, err := nw.WriteString(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		kln, ok := <-item.inch
+		if !ok {
+			continue
+		}
+		item.kln = kln
+		heap.Push(&pq, item)
+		pq.update(item, item.kln.line, item.kln.key)
+	}
+	err := nw.Flush()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func insemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
 	var items = make([]item, 0)
 
@@ -203,5 +282,6 @@ func mergefiles(ofn string, dn string, lpo int) {
 		defer ofp.Close()
 	}
 
-	insemit(ofp, dn, finfs)
+	pqemit(ofp, dn, finfs)
+	//insemit(ofp, dn, finfs)
 }

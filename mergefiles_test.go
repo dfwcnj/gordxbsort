@@ -43,6 +43,14 @@ func Test_mergefiles(t *testing.T) {
 		savemergefile(slns, fn)
 	}
 
+	//finfs, err := os.ReadDir(dn)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	// this must be tested
+	//lpo = 1<<19
+
 	mfn := "mergeout.txt"
 	mpath := filepath.Join(dn, mfn)
 	mergefiles(mpath, dn, int(lpo))

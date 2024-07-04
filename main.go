@@ -247,7 +247,7 @@ func main() {
 	var reclen, keylen, keyoff int
 	var lpo int
 	flag.StringVar(&ofn, "ofn", "", "output file name")
-	flag.StringVar(&iomem, "iomem", "", "max read memory size nMB or nGB")
+	flag.StringVar(&iomem, "iomem", "500mb", "max read memory size in kb, mb or gb")
 	flag.IntVar(&reclen, "reclen", 0, "length of the fixed length record")
 	flag.IntVar(&keyoff, "keyoff", 0, "offset of the key")
 	flag.IntVar(&keylen, "keylen", 0, "length of the key if not whole line")

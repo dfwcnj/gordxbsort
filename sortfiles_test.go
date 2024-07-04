@@ -13,7 +13,7 @@ import (
 func Test_sortfiles(t *testing.T) {
 	var l uint = 32
 	var lpo uint = 1 << 20
-	var iomem int64 = 1 << 30
+	var iomem int64 = 1 << 29
 	var nmf = 10
 	var tmpdir = "/tmp"
 
