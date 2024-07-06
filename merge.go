@@ -101,7 +101,7 @@ func mergefiles(ofn string, dn string, lpo int) {
 		defer ofp.Close()
 	}
 
-	//pqscanemit(ofp, dn, klnullsplit, finfs)
-	pqchanemit(ofp, dn, finfs)
+	pqreademit(ofp, dn, klnullsplit, finfs)
+	//pqchanemit(ofp, dn, finfs)
 	//insemit(ofp, dn, finfs)
 }

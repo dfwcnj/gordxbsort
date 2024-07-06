@@ -55,7 +55,7 @@ func (pq *SPQ) update(sitem *sitem, value []byte, priority []byte) {
 	heap.Fix(pq, sitem.index)
 }
 
-func scanitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
+func nextitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
 
 	var kln kvalline
 
@@ -72,7 +72,7 @@ func scanitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
 	if kg != nil {
 		bls := kg(bln)
 		if len(bls) != 2 {
-			log.Fatal("scanitem len ", bls, "wanted 2  got ", len(bls))
+			log.Fatal("nextitem len ", bls, "wanted 2  got ", len(bls))
 		}
 		kln.key = bls[0]
 		kln.line = bls[1]
@@ -81,7 +81,7 @@ func scanitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
 	return kln, nil
 }
 
-func pqscanemit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.DirEntry) {
+func pqreademit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.DirEntry) {
 	pq := make(SPQ, len(finfs))
 
 	for i, finf := range finfs {
@@ -96,7 +96,7 @@ func pqscanemit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.Di
 		//itm.scn = bufio.NewScanner(fp)
 		r := io.Reader(fp)
 		itm.scn = bufio.NewReader(r)
-		itm.kln, err = scanitem(itm.scn, kg)
+		itm.kln, err = nextitem(itm.scn, kg)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -117,7 +117,7 @@ func pqscanemit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.Di
 			log.Fatal(err)
 		}
 
-		sitem.kln, err = scanitem(sitem.scn, kg)
+		sitem.kln, err = nextitem(sitem.scn, kg)
 		if err != nil {
 			continue
 		}
@@ -126,6 +126,10 @@ func pqscanemit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.Di
 		pq.update(sitem, sitem.kln.line, sitem.kln.key)
 	}
 	err := nw.Flush()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = nw.Flush()
 	if err != nil {
 		log.Fatal(err)
 	}

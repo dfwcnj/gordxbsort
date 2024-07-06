@@ -9,7 +9,7 @@ vet: fmt
 	go vet *.go
 
 build: vet
-	go build -o rdxbin  main.go klrsort2a.go merge.go input.go pqchan.go
+	go build -o rdxbin  main.go klrsort2a.go merge.go input.go pqread.go
 
 profile:
 	go test -blockprofile block.prof -cpuprofile cpu.prof -memprofile mem.prof -mutexprofile mutex.prof -bench .
