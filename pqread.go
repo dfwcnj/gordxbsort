@@ -111,7 +111,8 @@ func pqreademit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.Di
 
 	for pq.Len() > 0 {
 		sitem := heap.Pop(&pq).(*sitem)
-		s := fmt.Sprintf("%s\n", string(sitem.kln.line))
+		//s := fmt.Sprintf("%s\n", string(sitem.kln.line))
+		s := fmt.Sprintf("%s", string(sitem.kln.line))
 		_, err := nw.WriteString(s)
 		if err != nil {
 			log.Fatal(err)
