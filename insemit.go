@@ -3,10 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 func iteminsertionsort(items []item) []item {
@@ -22,13 +20,12 @@ func iteminsertionsort(items []item) []item {
 	return items
 }
 
-func insemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
+func insemit(ofp *os.File, fns []string) {
 	var items = make([]item, 0)
 
 	// populate the priority queue
-	for _, finf := range finfs {
+	for _, fn := range fns {
 
-		fn := filepath.Join(dn, finf.Name())
 		var itm item
 
 		inch := make(chan kvalline)

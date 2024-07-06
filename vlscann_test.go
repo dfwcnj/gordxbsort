@@ -15,7 +15,7 @@ import (
 
 func Test_vlscann(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 20
+	var nrs uint = 1 << 20
 	var iomem int64 = 1 << 30
 	var nr int
 
@@ -29,7 +29,7 @@ func Test_vlscann(t *testing.T) {
 	}
 	defer os.RemoveAll(dn)
 
-	rsl := randomstrings(lpo, l)
+	rsl := randomstrings(nrs, l)
 
 	fn := path.Join(dn, "rtxt.txt")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0644)
@@ -47,7 +47,7 @@ func Test_vlscann(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	klns, _, err = vlscann(fp, 0, 0, 0, 0, iomem)
+	klns, _, err = vlscann(fp, 0, 0, 0, iomem)
 	for _, kln := range klns {
 		if len(kln.line) == 0 {
 			log.Fatal("vlscann len(kln.line) == 0")
@@ -57,8 +57,8 @@ func Test_vlscann(t *testing.T) {
 		}
 		//log.Print(string(kln.line))
 	}
-	if len(klns) != int(lpo) {
-		log.Fatal("vlscann: expected ", lpo, " got ", len(klns))
+	if len(klns) != int(nrs) {
+		log.Fatal("vlscann: expected ", nrs, " got ", len(klns))
 	}
 	log.Print("vlscann test passed")
 }

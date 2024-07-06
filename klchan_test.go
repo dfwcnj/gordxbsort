@@ -10,7 +10,7 @@ import (
 
 func Test_klchan(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 20
+	var nrs uint = 1 << 20
 
 	log.Print("klchan test")
 
@@ -24,14 +24,14 @@ func Test_klchan(t *testing.T) {
 		var klns kvallines
 		var kln kvalline
 
-		rsl := randomstrings(lpo, l)
+		rsl := randomstrings(nrs, l)
 		for _, s := range rsl {
 			bln := []byte(s)
 			kln.line = bln
 			kln.key = kln.line
 			klns = append(klns, kln)
 		}
-		if len(klns) != int(lpo) {
+		if len(klns) != int(nrs) {
 			//log.Print(klns)
 			log.Fatal("klns: before sort wanted len ", l, " got ", len(klns))
 		}
@@ -49,8 +49,8 @@ func Test_klchan(t *testing.T) {
 		for ckln := range inch {
 			cklns = append(cklns, ckln)
 		}
-		if len(cklns) != int(lpo) {
-			log.Fatal("klchan len(klns) wanted ", lpo, " got ", len(cklns))
+		if len(cklns) != int(nrs) {
+			log.Fatal("klchan len(klns) wanted ", nrs, " got ", len(cklns))
 		}
 		log.Print("klchan test passed")
 

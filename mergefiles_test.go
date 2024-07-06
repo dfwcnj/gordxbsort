@@ -12,8 +12,9 @@ import (
 
 func Test_mergefiles(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 20
+	var nrs uint = 1 << 20
 	var nmf = 10
+	var fns []string
 
 	log.Print("mergefiles test")
 
@@ -27,33 +28,26 @@ func Test_mergefiles(t *testing.T) {
 		var klns kvallines
 		var kln kvalline
 
-		rsl := randomstrings(lpo, l)
+		rsl := randomstrings(nrs, l)
 		for _, s := range rsl {
 			bln := []byte(s)
 			kln.line = bln
 			kln.key = kln.line
 			klns = append(klns, kln)
 		}
-		if len(klns) != int(lpo) {
+		if len(klns) != int(nrs) {
 			log.Fatal("klns: before sort wanted len ", l, " got ", len(klns))
 		}
 
 		slns := klrsort2a(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("file", i))
 		savemergefile(slns, fn)
+		fns = append(fns, fn)
 	}
-
-	//finfs, err := os.ReadDir(dn)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	// this must be tested
-	//lpo = 1<<19
 
 	mfn := "mergeout.txt"
 	mpath := filepath.Join(dn, mfn)
-	mergefiles(mpath, dn, int(lpo))
+	mergefiles(mpath, fns)
 
 	mfp, err := os.Open(mpath)
 	if err != nil {
@@ -67,8 +61,8 @@ func Test_mergefiles(t *testing.T) {
 		l := scanner.Text()
 		mlns = append(mlns, l)
 	}
-	if len(mlns) != int(lpo)*nmf {
-		log.Fatal(mpath, " wanted ", int(lpo)*nmf, " got ", len(mlns))
+	if len(mlns) != int(nrs)*nmf {
+		log.Fatal(mpath, " wanted ", int(nrs)*nmf, " got ", len(mlns))
 	}
 	if !slices.IsSorted(mlns) {
 		log.Fatal("lines in ", mfn, " not in sort order")

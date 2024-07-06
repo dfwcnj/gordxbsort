@@ -5,10 +5,8 @@ import (
 	"bytes"
 	"container/heap"
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 // kln.key serves as the priority
@@ -91,11 +89,10 @@ func klchan(fn string, kg func([]byte) [][]byte, out chan kvalline) {
 	close(out)
 }
 
-func pqchanemit(ofp *os.File, dn string, finfs []fs.DirEntry) {
-	pq := make(PriorityQueue, len(finfs))
+func pqchanemit(ofp *os.File, fns []string) {
+	pq := make(PriorityQueue, len(fns))
 
-	for i, finf := range finfs {
-		fn := filepath.Join(dn, finf.Name())
+	for i, fn := range fns {
 		var itm item
 
 		inch := make(chan kvalline)

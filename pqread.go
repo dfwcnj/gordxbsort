@@ -6,10 +6,8 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
-	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 // kln.key serves as the priority
@@ -81,11 +79,10 @@ func nextitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
 	return kln, nil
 }
 
-func pqreademit(ofp *os.File, dn string, kg func([]byte) [][]byte, finfs []fs.DirEntry) {
-	pq := make(SPQ, len(finfs))
+func pqreademit(ofp *os.File, kg func([]byte) [][]byte, fns []string) {
+	pq := make(SPQ, len(fns))
 
-	for i, finf := range finfs {
-		fn := filepath.Join(dn, finf.Name())
+	for i, fn := range fns {
 		var itm sitem
 
 		fp, err := os.Open(fn)

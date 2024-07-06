@@ -83,14 +83,10 @@ func klnullsplit(bln []byte) [][]byte {
 	return bls
 }
 
-func mergefiles(ofn string, dn string, lpo int) {
+func mergefiles(ofn string, fns []string) {
 	log.Print("multi step merge not implemented")
 
-	finfs, err := os.ReadDir(dn)
-	if err != nil {
-		log.Fatal("ReadDir ", dn, ": ", err)
-	}
-	//log.Println("mergefiles dn ", dn)
+	var err error
 
 	ofp := os.Stdout
 	if ofn != "" {
@@ -101,7 +97,7 @@ func mergefiles(ofn string, dn string, lpo int) {
 		defer ofp.Close()
 	}
 
-	pqreademit(ofp, dn, klnullsplit, finfs)
-	//pqchanemit(ofp, dn, finfs)
-	//insemit(ofp, dn, finfs)
+	pqreademit(ofp, klnullsplit, fns)
+	//pqchanemit(ofp, knullsplit, fns)
+	//insemit(ofp, knullsplit, fns)
 }

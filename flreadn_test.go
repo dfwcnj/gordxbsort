@@ -15,17 +15,18 @@ import (
 
 func Test_flreadn(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 20
+	var lrs uint = 1 << 20
 	var iomem int64 = 1 << 30
 
 	var klns kvallines
+	var tklns kvallines
 	var offset int64
 	var err error
 	var nr int
 
 	log.Println("flreadn test")
 
-	rsl := randomstrings(lpo, l)
+	rsl := randomstrings(lrs, l)
 
 	dn, err := initmergedir("rdxsort")
 	if err != nil {
@@ -57,19 +58,24 @@ func Test_flreadn(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	//klns, offset, err = flreadn(fp, offset, int(l), 0, 0, int(lpo), iomem)
-	klns, offset, err = flreadn(fp, offset, int(l)+1, 0, 0, 0, iomem)
-	for _, kln := range klns {
-		if len(kln.line) != int(l)+1 {
-			log.Fatal("kln.line ", kln.line, " len ", len(kln.line))
+	for {
+		klns, offset, err = flreadn(fp, offset, int(l)+1, 0, 0, iomem)
+		if len(klns) == 0 {
+			break
 		}
-		if len(kln.key) != len(kln.line) {
-			log.Fatal("kln.key ", kln.line, " len ", len(kln.line))
+		for _, kln := range klns {
+			if len(kln.line) != int(l)+1 {
+				log.Fatal("kln.line ", kln.line, " len ", len(kln.line))
+			}
+			if len(kln.key) != len(kln.line) {
+				log.Fatal("kln.key ", kln.line, " len ", len(kln.line))
+			}
+			//log.Print(string(kln.line))
 		}
-		//log.Print(string(kln.line))
+		tklns = append(tklns, klns...)
 	}
-	if len(klns) != int(lpo) {
-		log.Fatal("flreadn: expected ", lpo, " got ", len(klns))
+	if len(tklns) != int(lrs) {
+		log.Fatal("flreadn: expected ", lrs, " got ", len(klns))
 	}
 	log.Print("flreadn test passed")
 }

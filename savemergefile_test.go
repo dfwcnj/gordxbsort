@@ -12,7 +12,7 @@ import (
 
 func Test_savemergefile(t *testing.T) {
 	var l uint = 32
-	var lpo uint = 1 << 20
+	var nrs uint = 1 << 20
 
 	log.Print("savemergefile test")
 	dn, err := initmergedir("rdxsort")
@@ -25,14 +25,14 @@ func Test_savemergefile(t *testing.T) {
 		var klns kvallines
 		var kln kvalline
 
-		rsl := randomstrings(lpo, l)
+		rsl := randomstrings(nrs, l)
 		for _, s := range rsl {
 			bln := []byte(s)
 			kln.line = bln
 			kln.key = kln.line
 			klns = append(klns, kln)
 		}
-		if len(klns) != int(lpo) {
+		if len(klns) != int(nrs) {
 			//log.Print(klns)
 			log.Fatal("klns: before sort wanted len ", l, " got ", len(klns))
 		}
@@ -61,8 +61,8 @@ func Test_savemergefile(t *testing.T) {
 			}
 			rlns = append(rlns, sa[1])
 		}
-		if len(rlns) != int(lpo) {
-			log.Fatal("rlns wanted ", lpo, " got ", len(rlns))
+		if len(rlns) != int(nrs) {
+			log.Fatal("rlns wanted ", nrs, " got ", len(rlns))
 		}
 	}
 	log.Print("savemergefile test passed")
