@@ -38,27 +38,31 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 
 	for {
 
+		log.Println("sortflrecfile flreadn ", offset)
 		klns, offset, err = flreadn(fp, offset, reclen, keyoff, keylen, iomem)
 		if len(klns) == 0 {
-			break
+			log.Println("sortflrecfile klns ", len(klns))
+			return klns, mfiles, err
 		}
+
 		sklns := klrsort2a(klns, 0)
 
-		if offset == 0 {
-			return sklns, mfiles, nil
-		}
 		if offset > 0 && len(sklns) > 0 {
 			mfn := filepath.Join(dn, filepath.Base(fmt.Sprintf("%s%d", fn, i)))
+			log.Println("sortflrecfile mfn ", mfn)
 			if savemergefile(sklns, mfn) == "" {
 				log.Fatal("savemergefile failed: ", fn, " ", dn)
 			}
 			mfiles = append(mfiles, mfn)
 		}
+		if err == io.EOF {
+			log.Println("sortflrecfile eof")
+			return sklns, mfiles, nil
+		}
 
 		i++
 
 	}
-	return klns, mfiles, err
 }
 
 // sort variable lengh records file
@@ -84,13 +88,13 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 	}
 
 	for {
-		klns, offset, err = vlscann(fp, offset, keyoff, keylen, iomem)
+		klns, offset, err = vlreadn(fp, offset, keyoff, keylen, iomem)
 
 		if err != nil {
-			log.Fatal("sortvlrecfile after vlscann ", fn, " ", err)
+			log.Fatal("sortvlrecfile after vlreadn ", fn, " ", err)
 		}
 		if len(klns) == 0 {
-			break
+			return klns, mfiles, err
 		}
 
 		sklns := klrsort2a(klns, 0)
@@ -100,6 +104,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 		}
 		if offset > 0 && len(sklns) > 0 {
 			mfn := filepath.Join(dn, filepath.Base(fmt.Sprintf("%s%d", fn, i)))
+			log.Println("sortvlrecfile mfn ", mfn)
 			if savemergefile(sklns, mfn) == "" {
 				log.Fatal("savemergefile failed: ", fn, " ", dn)
 			}
@@ -108,7 +113,6 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 		i++
 
 	}
-	return klns, mfiles, err
 }
 
 func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, iomem int64) {
@@ -175,7 +179,6 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, iom
 				log.Fatal(err)
 			}
 		}
-
 		return
 	}
 
@@ -199,6 +202,7 @@ func sortfiles(fns []string, ofn string, reclen int, keyoff int, keylen int, iom
 		}
 		if len(mfns) > 0 {
 			mfiles = append(mfiles, mfns...)
+			continue
 		}
 
 		mfn := fmt.Sprintf("%s", filepath.Base(fn))

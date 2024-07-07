@@ -65,19 +65,17 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 		if fp.Name() == "/dev/stdin" {
 			log.Fatal("flreadn(stdin) more than iomem")
 		}
-		log.Printf("sfpread seeking to %d\n", offset)
-		_, err := fp.Seek(offset, 0)
-		if err != nil {
-			if err == io.EOF {
-				return klns, offset, err
-			}
-			log.Fatal("flreadn: ", err)
+		if offset == finf.Size() {
+			log.Fatal("flreadn ", fp.Name(), " end of file")
 		}
+		log.Printf("flreadn %s  seeking to %d\n", fp.Name(), offset)
+		fp.Seek(offset, 0)
 	}
 	for {
 		buf := make([]byte, reclen)
 		if bl, err = io.ReadFull(fp, buf); err != nil {
 			if err == io.EOF {
+				log.Println("flreadn readfull eof")
 				return klns, offset, err
 			}
 			log.Fatal("flreadn: ", err)
@@ -89,7 +87,8 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 			if err != nil && err != io.EOF {
 				log.Fatal(err)
 			}
-			return klns, memused, err
+			log.Println("flreadn memused ", memused, " iomem ", iomem)
+			return klns, offset, err
 		}
 
 		var kln kvalline
@@ -146,7 +145,7 @@ func vlreadall(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (
 	return klns, offset, nil
 }
 
-func vlscann(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
+func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
 
 	var klns kvallines
 	var memused int64
@@ -156,33 +155,30 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 		log.Fatal()
 	}
 	if finf.Size() < iomem {
+		log.Println("vlreadn vlreadall")
 		return vlreadall(fp, offset, keyoff, keylen, finf.Size())
 	}
 
 	if offset != 0 {
 		if fp.Name() == "/dev/stdin" {
-			log.Fatal("vlscann(stdin) offset ", offset)
+			log.Fatal("vlreadn(stdin) offset ", offset)
 		}
-		_, err := fp.Seek(offset, 0)
-		if err != nil {
-			if err == io.EOF {
-				return klns, offset, err
-			}
-			log.Fatal("vlscann", err)
+		if offset == finf.Size() {
+			log.Fatal("vlreadn ", fp.Name(), " end of file")
 		}
+		log.Printf("vlreadn %s  seeking to %d\n", fp.Name(), offset)
+		fp.Seek(offset, 0)
 	}
 
-	n := 1 << 30
-	sbuf := make([]byte, n)
+	r := io.Reader(fp)
+	nw := bufio.NewReader(r)
 
-	scanner := bufio.NewScanner(fp)
-	scanner.Buffer(sbuf, n*2)
-
-	for scanner.Scan() {
-		var kln kvalline
-		l := scanner.Text()
-		if len(l) == 0 {
-			continue
+	for {
+		l, err := nw.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				return klns, 0, err
+			}
 		}
 		memused += int64(len(l))
 		if memused >= iomem {
@@ -190,11 +186,13 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 			if err != nil && err != io.EOF {
 				log.Fatal(err)
 			}
-			return klns, memused, err
+			log.Println("vlreadn memused ", memused, " iomem ", iomem)
+			log.Println("vlreadn ", len(klns), " ", offset, " ", err)
+			return klns, offset, err
 		}
-
 		bln := []byte(l)
 		bls := klnullsplit(bln)
+		var kln kvalline
 		if len(bls) == 2 {
 			kln.key = bls[0]
 			kln.line = bls[1]
@@ -210,9 +208,4 @@ func vlscann(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 		}
 		klns = append(klns, kln)
 	}
-	if scanner.Err() != nil {
-		log.Fatal("vlscann: ", scanner.Err())
-	}
-	return klns, offset, nil
-
 }

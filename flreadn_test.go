@@ -34,7 +34,7 @@ func Test_flreadn(t *testing.T) {
 	}
 	defer os.RemoveAll(dn)
 
-	fn := path.Join(dn, "rtxt.txt")
+	fn := path.Join(dn, "flreadntest")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
