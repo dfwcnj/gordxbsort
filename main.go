@@ -88,6 +88,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 	}
 
 	for {
+		//log.Println("sortvlrecfile vlreadn ", fn, " ", offset, " ", iomem)
 		klns, offset, err = vlreadn(fp, offset, keyoff, keylen, iomem)
 
 		if err != nil {

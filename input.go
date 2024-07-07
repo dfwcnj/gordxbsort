@@ -69,7 +69,13 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 			log.Fatal("flreadn ", fp.Name(), " end of file")
 		}
 		log.Printf("flreadn %s  seeking to %d\n", fp.Name(), offset)
-		fp.Seek(offset, 0)
+		o, err := fp.Seek(offset, 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if o != offset {
+			log.Fatal("flreadn seek wanted", offset, " got ", o)
+		}
 	}
 	for {
 		buf := make([]byte, reclen)
@@ -87,7 +93,7 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 			if err != nil && err != io.EOF {
 				log.Fatal(err)
 			}
-			log.Println("flreadn memused ", memused, " iomem ", iomem)
+			log.Println("flreadn offset ", offset, " iomem ", iomem)
 			return klns, offset, err
 		}
 

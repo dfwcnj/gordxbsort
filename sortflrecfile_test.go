@@ -44,15 +44,15 @@ func Test_sortflrecfile(t *testing.T) {
 	log.Printf("sortflrecfile test  %s, %s, %d\n", fn, dn, iomem)
 	klns, fns, err := sortflrecfile(fn, dn, int(l)+1, 0, 0, iomem)
 
-	log.Println("sortflrecfile after klns ", len(klns))
-	log.Println("sortflrecfile after fns ", len(fns))
+	log.Println("sortflrecfile test after klns ", len(klns))
+	log.Println("sortflrecfile test after fns ", len(fns))
 
 	for _, f := range fns {
 		mfp, err := os.Open(f)
 		if err != nil {
 			log.Fatal(err)
 		}
-		tklns, _, err = vlreadn(mfp, 0, 0, 0, iomem)
+		tklns, _, err = flreadn(mfp, 0, int(l)*2, 0, 0, iomem)
 		nss += uint(len(tklns))
 	}
 	if nrs != nss {
