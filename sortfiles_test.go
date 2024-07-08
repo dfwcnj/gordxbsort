@@ -13,7 +13,8 @@ import (
 func Test_sortfiles(t *testing.T) {
 	var l uint = 32
 	var nrs uint = 1 << 20
-	var iomem int64 = 1 << 29
+	//var iomem int64 = 1 << 29
+	var iomem int64 = 1<<24 + 1<<20
 	var nmf = 10
 	var dlim string
 	dlim = "\n"

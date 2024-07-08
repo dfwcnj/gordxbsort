@@ -176,31 +176,6 @@ func sortfiles(fns []string, ofn string, dn string, reclen int, keyoff int, keyl
 		return
 	}
 
-	if len(fns) == 1 {
-		//log.Printf("sortfiles fn %s\n", fns[0])
-		if reclen != 0 {
-			klns, mfiles, mrlen, err = sortflrecfile(fns[0], "", reclen, keyoff, keylen, iomem)
-		} else {
-			klns, mfiles, err = sortvlrecfile(fns[0], "", reclen, keyoff, keylen, iomem)
-		}
-		if err != nil && err != io.EOF {
-			log.Fatal(err)
-		}
-		if len(mfiles) > 0 {
-			mergefiles(ofn, mrlen, mfiles)
-			return
-		}
-
-		for _, kln := range klns {
-
-			_, err := fp.Write(kln.line)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		return
-	}
-
 	for _, fn := range fns {
 		var klns kvallines
 		var mfns []string
