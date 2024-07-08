@@ -23,7 +23,7 @@ func Test_cklrsort2a(t *testing.T) {
 
 		var klns kvallines
 
-		log.Print("testing sort of ", nl)
+		//log.Print("testing sort of ", nl)
 		rsl := randomstrings(nl, l)
 		if len(rsl) != int(nl) {
 			log.Fatal("rsl: wanted len ", nl, " got ", len(rsl))
@@ -61,9 +61,9 @@ func Test_cklrsort2a(t *testing.T) {
 			}
 		}
 		if !sort.StringsAreSorted(ssl) {
-			t.Error("rsort2a failed for size ", nl)
+			t.Error("rsort2a failed")
 		} else {
-			log.Print("sort test passed for ", nl)
+			log.Print("cklrsort2a test passed")
 		}
 	}
 }

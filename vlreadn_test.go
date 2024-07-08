@@ -23,7 +23,7 @@ func Test_vlreadn(t *testing.T) {
 
 	log.Print("vlreadn test")
 
-	dn, err := initmergedir("rdxsort")
+	dn, err := initmergedir("/tmp", "rdxsort")
 	if err != nil {
 		log.Fatal(err)
 	}

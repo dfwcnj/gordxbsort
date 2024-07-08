@@ -7,12 +7,12 @@ import (
 	"os"
 )
 
-func initmergedir(dn string) (string, error) {
-	mdn, err := makemergedir(dn)
+func initmergedir(tn string, dn string) (string, error) {
+	mdn, err := makemergedir(tn, dn)
 	if err != nil {
 		if os.IsExist(err) {
 			os.RemoveAll(mdn)
-			return makemergedir(dn)
+			return makemergedir(tn, dn)
 		}
 		log.Fatal(err)
 	}
@@ -20,17 +20,20 @@ func initmergedir(dn string) (string, error) {
 
 }
 
-func makemergedir(dn string) (string, error) {
+func makemergedir(tn string, dn string) (string, error) {
 	if dn == "" {
 		dn = "rdxsort"
 	}
-	mdn, err := os.MkdirTemp("", dn)
+	mdn, err := os.MkdirTemp(tn, dn)
 	return mdn, err
 }
 
 // save merge file
 // save key and line separated by null bute
-func savemergefile(klns kvallines, fn string) string {
+func savemergefile(klns kvallines, fn string, dlim string) (string, int) {
+
+	// log.Println("savemergefile len delim ", len(dlim))
+	var mrlen int
 
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
@@ -43,7 +46,8 @@ func savemergefile(klns kvallines, fn string) string {
 
 	for _, kln := range klns {
 
-		knl := string(kln.key) + string(n) + string(kln.line) + "\n"
+		knl := string(kln.key) + string(n) + string(kln.line) + dlim
+		mrlen = len(knl)
 
 		//_, err := fp.Write([]byte(knl))
 		_, err := nw.WriteString(knl)
@@ -55,7 +59,7 @@ func savemergefile(klns kvallines, fn string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return fn
+	return fn, mrlen
 }
 
 // bufSplit(buf, reclen)
@@ -83,8 +87,8 @@ func klnullsplit(bln []byte) [][]byte {
 	return bls
 }
 
-func mergefiles(ofn string, fns []string) {
-	log.Print("multi step merge not implemented")
+func mergefiles(ofn string, reclen int, fns []string) {
+	// log.Print("multi step merge not implemented")
 
 	var err error
 
@@ -97,7 +101,8 @@ func mergefiles(ofn string, fns []string) {
 		defer ofp.Close()
 	}
 
-	pqreademit(ofp, klnullsplit, fns)
+	// log.Print("mergefiles pqreademit ", reclen)
+	pqreademit(ofp, reclen, klnullsplit, fns)
 	//pqchanemit(ofp, knullsplit, fns)
 	//insemit(ofp, knullsplit, fns)
 }

@@ -14,7 +14,7 @@ build: vet
 profile:
 	go test -blockprofile block.prof -cpuprofile cpu.prof -memprofile mem.prof -mutexprofile mutex.prof -bench .
 
-test:
+test: vet clobber
 	go test
 
 clean:
@@ -23,3 +23,4 @@ clean:
 
 clobber: clean
 	/bin/rm -f *.pdf
+	/bin/rm -rf /tmp/rdxsort*

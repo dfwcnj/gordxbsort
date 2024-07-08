@@ -15,9 +15,12 @@ func Test_sortfiles(t *testing.T) {
 	var nrs uint = 1 << 20
 	var iomem int64 = 1 << 29
 	var nmf = 10
-	var tmpdir = "/tmp"
+	var dlim string
+	dlim = "\n"
 
 	log.Print("sortfiles test")
+
+	dn, err := initmergedir("/tmp", "rdxsort")
 
 	var fns []string
 	for i := range nmf {
@@ -37,17 +40,17 @@ func Test_sortfiles(t *testing.T) {
 
 		//log.Println("sorting file", i)
 		slns := klrsort2a(klns, 0)
-		var fn = filepath.Join(tmpdir, fmt.Sprint("file", i))
+		var fn = filepath.Join(dn, fmt.Sprint("sortfilestest", i))
 		//log.Println("saving file", i)
-		savemergefile(slns, fn)
+		savemergefile(slns, fn, dlim)
 		fns = append(fns, fn)
 	}
 
 	mfn := "mergeout.txt"
-	mpath := filepath.Join(tmpdir, mfn)
+	mpath := filepath.Join(dn, mfn)
 
-	log.Println("sorting files to ", mpath)
-	sortfiles(fns, mpath, 0, 0, 0, iomem)
+	//log.Println("sortfiles test sorting files to ", mpath)
+	sortfiles(fns, mpath, dn, 0, 0, 0, iomem)
 
 	mfp, err := os.Open(mpath)
 	if err != nil {

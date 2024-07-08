@@ -10,13 +10,13 @@ import (
 )
 
 // kln.key serves as the priority
-type item struct {
+type chitem struct {
 	kln   kvalline
 	inch  chan kvalline
 	index int
 }
 
-type PriorityQueue []*item
+type PriorityQueue []*chitem
 
 func (pq PriorityQueue) Len() int { return len(pq) }
 
@@ -32,24 +32,24 @@ func (pq PriorityQueue) Swap(i, j int) {
 
 func (pq *PriorityQueue) Push(x interface{}) {
 	n := len(*pq)
-	item := x.(*item)
-	item.index = n
-	*pq = append(*pq, item)
+	chitem := x.(*chitem)
+	chitem.index = n
+	*pq = append(*pq, chitem)
 }
 
 func (pq *PriorityQueue) Pop() interface{} {
 	old := *pq
 	n := len(old)
-	item := old[n-1]
-	item.index = -1 // for safety
+	chitem := old[n-1]
+	chitem.index = -1 // for safety
 	*pq = old[0 : n-1]
-	return item
+	return chitem
 }
 
-func (pq *PriorityQueue) update(item *item, value []byte, priority []byte) {
-	item.kln.line = value
-	item.kln.key = priority
-	heap.Fix(pq, item.index)
+func (pq *PriorityQueue) update(chitem *chitem, value []byte, priority []byte) {
+	chitem.kln.line = value
+	chitem.kln.key = priority
+	heap.Fix(pq, chitem.index)
 }
 
 // klchan(fn, kg, out)
@@ -93,7 +93,7 @@ func pqchanemit(ofp *os.File, fns []string) {
 	pq := make(PriorityQueue, len(fns))
 
 	for i, fn := range fns {
-		var itm item
+		var itm chitem
 
 		inch := make(chan kvalline)
 		go klchan(fn, klnullsplit, inch)
@@ -109,20 +109,20 @@ func pqchanemit(ofp *os.File, fns []string) {
 	nw := bufio.NewWriter(ofp)
 
 	for pq.Len() > 0 {
-		item := heap.Pop(&pq).(*item)
-		s := fmt.Sprintf("%s\n", string(item.kln.line))
+		chitem := heap.Pop(&pq).(*chitem)
+		s := fmt.Sprintf("%s\n", string(chitem.kln.line))
 		_, err := nw.WriteString(s)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		kln, ok := <-item.inch
+		kln, ok := <-chitem.inch
 		if !ok {
 			continue
 		}
-		item.kln = kln
-		heap.Push(&pq, item)
-		pq.update(item, item.kln.line, item.kln.key)
+		chitem.kln = kln
+		heap.Push(&pq, chitem)
+		pq.update(chitem, chitem.kln.line, chitem.kln.key)
 	}
 	err := nw.Flush()
 	if err != nil {

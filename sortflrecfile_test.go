@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"slices"
 	"testing"
 )
 
@@ -16,14 +17,14 @@ import (
 func Test_sortflrecfile(t *testing.T) {
 	var l uint = 32
 	var nrs uint = 1 << 20
-	var nss uint
 	var iomem int64 = 1<<24 + 1<<20
+	var mrlen int
 
-	var klns kvallines
 	var tklns kvallines
 	var err error
 	var nr int
-	dn := "/tmp"
+
+	dn, err := initmergedir("/tmp", "rdxsort")
 
 	log.Println("sortflrecfile test")
 
@@ -34,29 +35,38 @@ func Test_sortflrecfile(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer fp.Close()
 
 	for i, _ := range rsl {
-		fmt.Fprintln(fp, rsl[i])
+		fmt.Fprint(fp, rsl[i])
 		nr++
 	}
+	fp.Close()
 
-	log.Printf("sortflrecfile test  %s, %s, %d\n", fn, dn, iomem)
-	klns, fns, err := sortflrecfile(fn, dn, int(l)+1, 0, 0, iomem)
+	_, fns, mrlen, err := sortflrecfile(fn, dn, int(l), 0, 0, iomem)
 
-	log.Println("sortflrecfile test after klns ", len(klns))
-	log.Println("sortflrecfile test after fns ", len(fns))
-
+	var nss uint
 	for _, f := range fns {
 		mfp, err := os.Open(f)
 		if err != nil {
 			log.Fatal(err)
 		}
-		tklns, _, err = flreadn(mfp, 0, int(l)*2, 0, 0, iomem)
+		finf, err := mfp.Stat()
+		if err != nil {
+			log.Fatal("sortflrecfiletest ", err)
+		}
+		tklns, _, err = flreadn(mfp, 0, mrlen, 0, 0, finf.Size())
+		var lns = make([]string, 0)
+		for _, t := range tklns {
+			lns = append(lns, string(t.line))
+		}
+		if slices.IsSorted(lns) == false {
+			log.Fatal(f, " is not sorted")
+		}
 		nss += uint(len(tklns))
 	}
 	if nrs != nss {
 		log.Fatal("sortflrecfile test wanted ", nrs, " got ", nss)
 	}
+	log.Println("sortflrecfile passed")
 
 }

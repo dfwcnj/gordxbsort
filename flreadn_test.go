@@ -28,7 +28,7 @@ func Test_flreadn(t *testing.T) {
 
 	rsl := randomstrings(lrs, l)
 
-	dn, err := initmergedir("rdxsort")
+	dn, err := initmergedir("/tmp", "rdxsort")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,9 +42,10 @@ func Test_flreadn(t *testing.T) {
 	defer fp.Close()
 
 	for i, _ := range rsl {
-		fmt.Fprintln(fp, rsl[i])
+		fmt.Fprint(fp, rsl[i])
 		nr++
 	}
+	fp.Sync()
 
 	// file length
 	offset, err = fp.Seek(0, 1)
@@ -59,12 +60,13 @@ func Test_flreadn(t *testing.T) {
 	}
 
 	for {
-		klns, offset, err = flreadn(fp, offset, int(l)+1, 0, 0, iomem)
+		//log.Println("flreadn test flreadn ", fn, " ", l)
+		klns, offset, err = flreadn(fp, offset, int(l), 0, 0, iomem)
 		if len(klns) == 0 {
 			break
 		}
 		for _, kln := range klns {
-			if len(kln.line) != int(l)+1 {
+			if len(kln.line) != int(l) {
 				log.Fatal("kln.line ", kln.line, " len ", len(kln.line))
 			}
 			if len(kln.key) != len(kln.line) {

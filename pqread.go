@@ -11,13 +11,14 @@ import (
 )
 
 // kln.key serves as the priority
-type sitem struct {
+type ritem struct {
 	kln   kvalline
-	scn   *bufio.Reader
+	br    *bufio.Reader
+	rlen  int
 	index int
 }
 
-type SPQ []*sitem
+type SPQ []*ritem
 
 func (pq SPQ) Len() int { return len(pq) }
 
@@ -33,44 +34,56 @@ func (pq SPQ) Swap(i, j int) {
 
 func (pq *SPQ) Push(x interface{}) {
 	n := len(*pq)
-	sitem := x.(*sitem)
-	sitem.index = n
-	*pq = append(*pq, sitem)
+	ritem := x.(*ritem)
+	ritem.index = n
+	*pq = append(*pq, ritem)
 }
 
 func (pq *SPQ) Pop() interface{} {
 	old := *pq
 	n := len(old)
-	sitem := old[n-1]
-	sitem.index = -1 // for safety
+	ritem := old[n-1]
+	ritem.index = -1 // for safety
 	*pq = old[0 : n-1]
-	return sitem
+	return ritem
 }
 
-func (pq *SPQ) update(sitem *sitem, value []byte, priority []byte) {
-	sitem.kln.line = value
-	sitem.kln.key = priority
-	heap.Fix(pq, sitem.index)
+func (pq *SPQ) update(ritem *ritem, value []byte, priority []byte) {
+	ritem.kln.line = value
+	ritem.kln.key = priority
+	heap.Fix(pq, ritem.index)
 }
 
-func nextitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
+func nextitem(itm ritem, kg func([]byte) [][]byte) (kvalline, error) {
 
 	var kln kvalline
+	var bln []byte
 
-	l, err := scn.ReadString('\n')
-	if err != nil {
-		return kln, err
+	if itm.rlen == 0 {
+		l, err := itm.br.ReadString('\n')
+		if err != nil {
+			// log.Println("nextitem readstring ", err)
+			return kln, err
+		}
+		// log.Print("nextitem readstring ", l)
+		bln = []byte(l)
+	} else {
+		bln = make([]byte, itm.rlen)
+		_, err := io.ReadFull(itm.br, bln)
+		if err != nil {
+			// log.Println("nextitem readfull ", err)
+			return kln, err
+		}
 	}
 
-	bln := []byte(l)
 	// default key is the whole line
 	kln.line = bln
 	kln.key = kln.line
-	// only if there is a key generator
+	// key generator
 	if kg != nil {
 		bls := kg(bln)
 		if len(bls) != 2 {
-			log.Fatal("nextitem len ", bls, "wanted 2  got ", len(bls))
+			log.Fatal("nextitem ", string(bln), "wanted 2  got ", len(bls))
 		}
 		kln.key = bls[0]
 		kln.line = bls[1]
@@ -79,23 +92,25 @@ func nextitem(scn *bufio.Reader, kg func([]byte) [][]byte) (kvalline, error) {
 	return kln, nil
 }
 
-func pqreademit(ofp *os.File, kg func([]byte) [][]byte, fns []string) {
+func pqreademit(ofp *os.File, reclen int, kg func([]byte) [][]byte, fns []string) {
+
 	pq := make(SPQ, len(fns))
 
 	for i, fn := range fns {
-		var itm sitem
+		var itm ritem
 
 		fp, err := os.Open(fn)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("pqreademit open ", fn, " ", err)
 		}
 
-		//itm.scn = bufio.NewScanner(fp)
-		r := io.Reader(fp)
-		itm.scn = bufio.NewReader(r)
-		itm.kln, err = nextitem(itm.scn, kg)
+		itm.rlen = reclen
+		rdr := io.Reader(fp)
+		itm.br = bufio.NewReader(rdr)
+
+		itm.kln, err = nextitem(itm, kg)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("pqreademit setup nextitem ", fn, " ", err)
 		}
 		itm.index = i
 
@@ -107,28 +122,24 @@ func pqreademit(ofp *os.File, kg func([]byte) [][]byte, fns []string) {
 	nw := bufio.NewWriter(ofp)
 
 	for pq.Len() > 0 {
-		sitem := heap.Pop(&pq).(*sitem)
-		//s := fmt.Sprintf("%s\n", string(sitem.kln.line))
-		s := fmt.Sprintf("%s", string(sitem.kln.line))
+		ritem := heap.Pop(&pq).(*ritem)
+		//s := fmt.Sprintf("%s\n", string(ritem.kln.line))
+		s := fmt.Sprintf("%s", string(ritem.kln.line))
 		_, err := nw.WriteString(s)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("pqreademit write ", err)
 		}
 
-		sitem.kln, err = nextitem(sitem.scn, kg)
+		ritem.kln, err = nextitem(*ritem, kg)
 		if err != nil {
 			continue
 		}
 
-		heap.Push(&pq, sitem)
-		pq.update(sitem, sitem.kln.line, sitem.kln.key)
+		heap.Push(&pq, ritem)
+		pq.update(ritem, ritem.kln.line, ritem.kln.key)
 	}
 	err := nw.Flush()
 	if err != nil {
-		log.Fatal(err)
-	}
-	err = nw.Flush()
-	if err != nil {
-		log.Fatal(err)
+		log.Fatal("pqreademit flush", err)
 	}
 }

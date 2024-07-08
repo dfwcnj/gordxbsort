@@ -65,10 +65,7 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 		if fp.Name() == "/dev/stdin" {
 			log.Fatal("flreadn(stdin) more than iomem")
 		}
-		if offset == finf.Size() {
-			log.Fatal("flreadn ", fp.Name(), " end of file")
-		}
-		log.Printf("flreadn %s  seeking to %d\n", fp.Name(), offset)
+		//log.Printf("flreadn %s  seeking to %d\n", fp.Name(), offset)
 		o, err := fp.Seek(offset, 0)
 		if err != nil {
 			log.Fatal(err)
@@ -78,28 +75,23 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 		}
 	}
 	for {
-		buf := make([]byte, reclen)
-		if bl, err = io.ReadFull(fp, buf); err != nil {
-			if err == io.EOF {
-				log.Println("flreadn readfull eof")
-				return klns, offset, err
-			}
-			log.Fatal("flreadn: ", err)
-		}
 
-		memused += int64(reclen)
-		if memused >= iomem || bl == 0 {
+		if memused >= iomem {
 			offset, err = fp.Seek(0, 1)
 			if err != nil && err != io.EOF {
 				log.Fatal(err)
 			}
-			log.Println("flreadn offset ", offset, " iomem ", iomem)
 			return klns, offset, err
 		}
 
+		buf := make([]byte, reclen)
+		if bl, err = io.ReadFull(fp, buf); err != nil {
+			if err == io.EOF && bl == 0 {
+				return klns, offset, err
+			}
+		}
+
 		var kln kvalline
-		// to avoid having to make buf in the loop
-		// mistake??
 		bls := klnullsplit(buf)
 		if len(bls) == 2 {
 			kln.key = bls[0]
@@ -115,8 +107,12 @@ func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iome
 			}
 		}
 		klns = append(klns, kln)
+
+		memused += int64(reclen)
+
 		nr++
 	}
+
 }
 
 func vlreadall(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
@@ -161,7 +157,6 @@ func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 		log.Fatal()
 	}
 	if finf.Size() < iomem {
-		log.Println("vlreadn vlreadall")
 		return vlreadall(fp, offset, keyoff, keylen, finf.Size())
 	}
 
@@ -169,10 +164,7 @@ func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 		if fp.Name() == "/dev/stdin" {
 			log.Fatal("vlreadn(stdin) offset ", offset)
 		}
-		if offset == finf.Size() {
-			log.Fatal("vlreadn ", fp.Name(), " end of file")
-		}
-		log.Printf("vlreadn %s  seeking to %d\n", fp.Name(), offset)
+		//log.Printf("vlreadn %s  seeking to %d\n", fp.Name(), offset)
 		fp.Seek(offset, 0)
 	}
 
@@ -180,31 +172,38 @@ func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 	nw := bufio.NewReader(r)
 
 	for {
-		l, err := nw.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				return klns, 0, err
-			}
-		}
-		memused += int64(len(l))
 		if memused >= iomem {
-			offset, err = fp.Seek(0, 1)
-			if err != nil && err != io.EOF {
-				log.Fatal(err)
-			}
-			log.Println("vlreadn memused ", memused, " iomem ", iomem)
-			log.Println("vlreadn ", len(klns), " ", offset, " ", err)
+			//log.Println("vlreadn memused >= iomem")
 			return klns, offset, err
 		}
+
+		l, err := nw.ReadString('\n')
+		// Seek seens to giv the buffer seek
+		offset += int64(len(l))
+		if err != nil {
+			if err == io.EOF && len(l) == 0 {
+				//log.Println("vlreadn readstring EOF ", offset)
+				return klns, offset, err
+			}
+			log.Fatal(err)
+		}
+
+		var kln kvalline
+
 		bln := []byte(l)
 		bls := klnullsplit(bln)
-		var kln kvalline
 		if len(bls) == 2 {
 			kln.key = bls[0]
+			if bls[0][len(bls[0])-1] == '\n' {
+				kln.key = bls[0][:len(bls)-1]
+			}
 			kln.line = bls[1]
 		} else {
-			kln.line = bln
 			kln.key = bln
+			if bln[len(bln)-1] == '\n' {
+				kln.key = bln[:len(bln)-1]
+			}
+			kln.line = bln
 		}
 		if keyoff != 0 {
 			kln.key = kln.line[keyoff:]
@@ -212,6 +211,9 @@ func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 				kln.key = kln.line[keyoff : keyoff+keylen]
 			}
 		}
+
 		klns = append(klns, kln)
+
+		memused += int64(len(l))
 	}
 }

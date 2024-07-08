@@ -13,9 +13,11 @@ import (
 func Test_savemergefile(t *testing.T) {
 	var l uint = 32
 	var nrs uint = 1 << 20
+	var dlim string
+	dlim = "\n"
 
 	log.Print("savemergefile test")
-	dn, err := initmergedir("rdxsort")
+	dn, err := initmergedir("/tmp", "rdxsort")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +41,7 @@ func Test_savemergefile(t *testing.T) {
 
 		slns := klrsort2a(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("file", i))
-		savemergefile(slns, fn)
+		savemergefile(slns, fn, dlim)
 
 		fp, err := os.Open(fn)
 		if err != nil {

@@ -7,53 +7,61 @@ import (
 	"os"
 )
 
-func iteminsertionsort(items []item) []item {
-	n := len(items)
+type sitem struct {
+	kln   kvalline
+	inch  chan kvalline
+	index int
+}
+
+var sitems []sitem
+
+func iteminsertionsort(sitems []sitem) []sitem {
+	n := len(sitems)
 	if n == 1 {
-		return items
+		return sitems
 	}
 	for i := 0; i < n; i++ {
-		for j := i; j > 0 && string(items[j-1].kln.key) > string(items[j].kln.key); j-- {
-			items[j], items[j-1] = items[j-1], items[j]
+		for j := i; j > 0 && string(sitems[j-1].kln.key) > string(sitems[j].kln.key); j-- {
+			sitems[j], sitems[j-1] = sitems[j-1], sitems[j]
 		}
 	}
-	return items
+	return sitems
 }
 
 func insemit(ofp *os.File, fns []string) {
-	var items = make([]item, 0)
+	var sitems = make([]sitem, 0)
 
 	// populate the priority queue
 	for _, fn := range fns {
 
-		var itm item
+		var itm sitem
 
 		inch := make(chan kvalline)
 		go klchan(fn, klnullsplit, inch)
 
 		itm.kln = <-inch
 		itm.inch = inch
-		items = append(items, itm)
+		sitems = append(sitems, itm)
 	}
 
 	nw := bufio.NewWriter(ofp)
-	for len(items) > 0 {
-		items = iteminsertionsort(items)
+	for len(sitems) > 0 {
+		sitems = iteminsertionsort(sitems)
 
-		s := fmt.Sprintf("%s\n", string(items[0].kln.line))
+		s := fmt.Sprintf("%s\n", string(sitems[0].kln.line))
 		_, err := nw.WriteString(s)
 		if err != nil {
 			log.Fatal(err)
 		}
-		//fmt.Fprintf(ofp, "%s\n", string(items[0].kln.line))
+		//fmt.Fprintf(ofp, "%s\n", string(sitems[0].kln.line))
 
-		kln, ok := <-items[0].inch
+		kln, ok := <-sitems[0].inch
 		if !ok {
-			items = items[1:]
+			sitems = sitems[1:]
 			continue
 		}
-		items[0].kln.key = kln.key
-		items[0].kln.line = kln.line
+		sitems[0].kln.key = kln.key
+		sitems[0].kln.line = kln.line
 	}
 	err := nw.Flush()
 	if err != nil {
