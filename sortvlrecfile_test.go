@@ -44,7 +44,7 @@ func Test_sortvlrecfile(t *testing.T) {
 	fp.Close()
 
 	//log.Printf("sortvlrecfile test sortvlrecfile %s, %d\n", fn, iomem)
-	_, fns, err := sortvlrecfile(fn, dn, int(l)+1, 0, 0, iomem)
+	klns, fns, err := sortvlrecfile(fn, dn, int(l)+1, 0, 0, iomem)
 
 	//log.Println("sortvlrecfile test after  klns ", len(klns))
 	//log.Println("sortvlrecfile test after fns ", fns)
@@ -56,6 +56,7 @@ func Test_sortvlrecfile(t *testing.T) {
 			log.Fatal(err)
 		}
 		tklns, _, err = vlreadn(mfp, 0, 0, 0, iomem*2)
+		//log.Println("sortvlrecfile test tklns ", len(tklns))
 
 		var lns = make([]string, 0)
 		for _, t := range tklns {
@@ -67,7 +68,7 @@ func Test_sortvlrecfile(t *testing.T) {
 		nss += int(len(tklns))
 	}
 	if nrs != nss {
-		log.Fatal("sortflrecfile test wanted ", nrs, " got ", nss)
+		log.Fatal("sortvlrecfile test wanted ", nrs, " got ", nss)
 	}
 	log.Println("sortvlrecfile passed")
 }
