@@ -11,8 +11,9 @@ import (
 )
 
 func Test_mergefiles(t *testing.T) {
-	var l uint = 32
-	var nrs uint = 1 << 20
+	var l int = 32
+	var r bool = true
+	var nrs int = 1 << 20
 	var dlim string
 	dlim = "\n"
 	var nmf = 10
@@ -30,7 +31,7 @@ func Test_mergefiles(t *testing.T) {
 		var klns kvallines
 		var kln kvalline
 
-		rsl := randomstrings(nrs, l)
+		rsl := randomstrings(nrs, l, r)
 		for _, s := range rsl {
 			bln := []byte(s)
 			kln.line = bln

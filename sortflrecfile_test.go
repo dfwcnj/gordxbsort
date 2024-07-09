@@ -15,8 +15,9 @@ import (
 //}
 
 func Test_sortflrecfile(t *testing.T) {
-	var l uint = 32
-	var nrs uint = 1 << 20
+	var l int = 32
+	var r bool = true
+	var nrs int = 1 << 20
 	var iomem int64 = 1<<24 + 1<<20
 	var mrlen int
 
@@ -28,7 +29,7 @@ func Test_sortflrecfile(t *testing.T) {
 
 	log.Println("sortflrecfile test")
 
-	rsl := randomstrings(nrs, l)
+	rsl := randomstrings(nrs, l, r)
 
 	fn := path.Join(dn, "sortflrecfiletest")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
@@ -44,7 +45,7 @@ func Test_sortflrecfile(t *testing.T) {
 
 	_, fns, mrlen, err := sortflrecfile(fn, dn, int(l), 0, 0, iomem)
 
-	var nss uint
+	var nss int
 	for _, f := range fns {
 		mfp, err := os.Open(f)
 		if err != nil {
@@ -62,7 +63,7 @@ func Test_sortflrecfile(t *testing.T) {
 		if slices.IsSorted(lns) == false {
 			log.Fatal(f, " is not sorted")
 		}
-		nss += uint(len(tklns))
+		nss += int(len(tklns))
 	}
 	if nrs != nss {
 		log.Fatal("sortflrecfile test wanted ", nrs, " got ", nss)

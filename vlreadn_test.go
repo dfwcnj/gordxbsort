@@ -14,8 +14,9 @@ import (
 //}
 
 func Test_vlreadn(t *testing.T) {
-	var l uint = 32
-	var nrs uint = 1 << 20
+	var l int = 32
+	var r bool = true
+	var nrs int = 1 << 20
 	var iomem int64 = 1 << 30
 	var nr int
 
@@ -29,7 +30,7 @@ func Test_vlreadn(t *testing.T) {
 	}
 	defer os.RemoveAll(dn)
 
-	rsl := randomstrings(nrs, l)
+	rsl := randomstrings(nrs, l, r)
 
 	fn := path.Join(dn, "vlreadn")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0644)

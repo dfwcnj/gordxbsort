@@ -15,16 +15,17 @@ import (
 func Test_klrsort2a(t *testing.T) {
 
 	log.Print("klrsort2a test")
-	var l uint = 32
-	//ls := []uint{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
-	ls := []uint{1 << 24}
+	var l int = 32
+	var r bool = true
+	//ls := []int{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
+	ls := []int{1 << 24}
 
 	for _, nl := range ls {
 
 		var klns kvallines
 
 		//log.Print("testing sort of ", nl)
-		rsl := randomstrings(nl, l)
+		rsl := randomstrings(nl, l, r)
 		if len(rsl) != int(nl) {
 			log.Fatal("rsl: wanted len ", nl, " got ", len(rsl))
 		}

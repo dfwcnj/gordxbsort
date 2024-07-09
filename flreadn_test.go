@@ -14,8 +14,9 @@ import (
 //}
 
 func Test_flreadn(t *testing.T) {
-	var l uint = 32
-	var lrs uint = 1 << 20
+	var l int = 32
+	var r bool = true
+	var lrs int = 1 << 20
 	var iomem int64 = 1 << 30
 
 	var klns kvallines
@@ -26,7 +27,7 @@ func Test_flreadn(t *testing.T) {
 
 	log.Println("flreadn test")
 
-	rsl := randomstrings(lrs, l)
+	rsl := randomstrings(lrs, l, r)
 
 	dn, err := initmergedir("/tmp", "rdxsort")
 	if err != nil {
