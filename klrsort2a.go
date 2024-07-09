@@ -19,7 +19,7 @@ func binsertionsort(klns kvallines) kvallines {
 		return klns
 	}
 	for i := 0; i < n; i++ {
-		for j := i; j > 0 && bytes.Compare(klns[j-1].key, klns[j].key) < 0; j-- {
+		for j := i; j > 0 && bytes.Compare(klns[j-1].key, klns[j].key) > 0; j-- {
 			klns[j], klns[j-1] = klns[j-1], klns[j]
 		}
 	}
@@ -29,8 +29,7 @@ func binsertionsort(klns kvallines) kvallines {
 // bostic
 func klrsort2a(klns kvallines, recix int) kvallines {
 	var piles = make([]kvallines, 256)
-	var nc int
-	var li int
+	var nc int // number piles
 	nl := len(klns)
 
 	if nl == 0 {
@@ -42,30 +41,28 @@ func klrsort2a(klns kvallines, recix int) kvallines {
 
 	for i, _ := range klns {
 
+		var c int
 		if recix >= len(klns[i].key) {
-			piles[0] = append(piles[0], klns[i])
-			if nc == 0 {
-				nc = 1
-			}
-			continue
+			c = 0
+		} else { // append kvalline to the pile indexed by c
+			c = int(klns[i].key[recix])
 		}
 
-		// append kvalline to the pile indexed by c
-		c := int(klns[i].key[recix])
 		piles[int(c)] = append(piles[c], klns[i])
 		if len(piles[c]) == 1 {
 			nc++ // number of piles so far
 		}
-		li = c
-	}
-	if nc == 0 {
-		return piles[0]
-	}
-	if nc == 1 {
-		return binsertionsort(piles[li])
 	}
 
-	for i, _ := range piles {
+	if len(piles[0]) > 1 {
+		piles[0] = binsertionsort(piles[0])
+	}
+	if nc == 1 {
+		return binsertionsort(klns)
+	}
+
+	//for i, _ := range piles {
+	for i := 1; i < len(piles); i++ {
 		if len(piles[i]) == 0 {
 			continue
 		}

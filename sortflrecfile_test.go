@@ -16,7 +16,7 @@ import (
 
 func Test_sortflrecfile(t *testing.T) {
 	var l int = 32
-	var r bool = true
+	var r bool = false
 	var nrs int = 1 << 20
 	var iomem int64 = 1<<24 + 1<<20
 	var mrlen int

@@ -18,7 +18,7 @@ func Test_cklrsort2a(t *testing.T) {
 	var l int = 32
 	var r bool = true
 	//ls := []uint{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
-	ls := []int{1 << 10, 1 << 20, 1 << 24}
+	ls := []int{1 << 4, 1 << 10, 1 << 20, 1 << 24}
 
 	for _, nl := range ls {
 
@@ -27,7 +27,7 @@ func Test_cklrsort2a(t *testing.T) {
 		//log.Print("testing sort of ", nl)
 		rsl := randomstrings(nl, l, r)
 		if len(rsl) != int(nl) {
-			log.Fatal("rsl: wanted len ", nl, " got ", len(rsl))
+			log.Fatal("cklrsort2a test rsl: wanted len ", nl, " got ", len(rsl))
 		}
 		for _, s := range rsl {
 			var kln kvalline
@@ -37,13 +37,13 @@ func Test_cklrsort2a(t *testing.T) {
 			klns = append(klns, kln)
 		}
 		if len(klns) != int(nl) {
-			log.Fatal("klns: before sort wanted len ", nl, " got ", len(klns))
+			log.Fatal("cklrsort2a test klns: before sort wanted len ", nl, " got ", len(klns))
 		}
 		inch := make(chan kvallines, 0)
 		go cklrsort2a(klns, 0, inch)
 		slns := <-inch
 		if len(slns) != int(nl) {
-			log.Fatal("slns: after sort wanted len ", nl, " got ", len(slns))
+			log.Fatal("cklrsort2a test slns: after sort wanted len ", nl, " got ", len(slns))
 		}
 
 		var ssl []string
@@ -51,18 +51,18 @@ func Test_cklrsort2a(t *testing.T) {
 			ssl = append(ssl, string(s.line))
 		}
 		if len(ssl) != 1 && ssl[0] == ssl[len(ssl)-1] {
-			log.Fatal("strings are all equal")
+			log.Fatal("cklrsort2a test strings are all equal")
 		}
 		if len(ssl) != int(nl) {
-			log.Fatal("ssl: wanted len ", nl, " got ", len(ssl))
+			log.Fatal("cklrsort2a test ssl: wanted len ", nl, " got ", len(ssl))
 		}
 		for i, _ := range ssl {
 			if len(ssl[i]) != int(l) {
-				log.Fatal("ssl[i]: wanted len ", l, " got ", len(ssl[i]))
+				log.Fatal("cklrsort2a test ssl[i]: wanted len ", l, " got ", len(ssl[i]))
 			}
 		}
 		if !sort.StringsAreSorted(ssl) {
-			t.Error("rsort2a failed")
+			t.Error("cklrsort2a test not in sort order")
 		} else {
 			log.Print("cklrsort2a test passed")
 		}

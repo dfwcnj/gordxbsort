@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"sort"
 	"testing"
 )
@@ -18,10 +19,11 @@ func Test_klrsort2a(t *testing.T) {
 	var l int = 32
 	var r bool = true
 	//ls := []int{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
-	ls := []int{1 << 10, 1 << 20, 1 << 24}
+	ls := []int{1 << 4, 1 << 10, 1 << 20, 1 << 24}
 
 	for _, nl := range ls {
 
+		log.Print("klrsort2a test ", nl)
 		var klns kvallines
 
 		//log.Print("testing sort of ", nl)
@@ -52,15 +54,19 @@ func Test_klrsort2a(t *testing.T) {
 			log.Fatal("strings are all equal")
 		}
 		if len(ssl) != int(nl) {
-			log.Fatal("ssl: wanted len ", nl, " got ", len(ssl))
-		}
-		for i, _ := range ssl {
-			if len(ssl[i]) != int(l) {
-				log.Fatal("ssl[i]: wanted len ", l, " got ", len(ssl[i]))
-			}
+			log.Fatal("klrsort2a test ssl: wanted len ", nl, " got ", len(ssl))
 		}
 		if !sort.StringsAreSorted(ssl) {
-			t.Error("rsort2a failed")
+			fp, err := os.OpenFile("/tmp/klrsort2atest", os.O_RDWR|os.O_CREATE, 0600)
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, l := range ssl {
+				l = l + "\n"
+				fp.Write([]byte(l))
+			}
+			fp.Close()
+			log.Fatal("klrrsort2a test not in sort order")
 		} else {
 			log.Print("klrsort2a test passed")
 		}

@@ -15,7 +15,7 @@ import (
 
 func Test_flreadn(t *testing.T) {
 	var l int = 32
-	var r bool = true
+	var r bool = false
 	var lrs int = 1 << 20
 	var iomem int64 = 1 << 30
 
@@ -28,6 +28,7 @@ func Test_flreadn(t *testing.T) {
 	log.Println("flreadn test")
 
 	rsl := randomstrings(lrs, l, r)
+	log.Println("flreadn test rsl ", len(rsl))
 
 	dn, err := initmergedir("/tmp", "rdxsort")
 	if err != nil {
