@@ -44,7 +44,7 @@ func Test_sortvlrecfile(t *testing.T) {
 	fp.Close()
 
 	//log.Printf("sortvlrecfile test sortvlrecfile %s, %d\n", fn, iomem)
-	klns, fns, err := sortvlrecfile(fn, dn, int(l)+1, 0, 0, iomem)
+	_, fns, err := sortvlrecfile(fn, dn, int(l)+1, 0, 0, iomem)
 
 	//log.Println("sortvlrecfile test after  klns ", len(klns))
 	//log.Println("sortvlrecfile test after fns ", fns)
