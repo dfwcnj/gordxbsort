@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 )
 
@@ -18,7 +19,7 @@ func cbinsertionsort(klns kvallines, out chan kvallines) {
 		out <- klns
 	}
 	for i := 0; i < n; i++ {
-		for j := i; j > 0 && string(klns[j-1].key) > string(klns[j].key); j-- {
+		for j := i; j > 0 && bytes.Compare(klns[j-1].key, klns[j].key) < 0; j-- {
 			klns[j], klns[j-1] = klns[j-1], klns[j]
 		}
 	}
@@ -31,7 +32,6 @@ func cklrsort2a(klns kvallines, recix int, out chan kvallines) {
 	var nc int
 	var li int
 	nl := len(klns)
-	pilelen := make([]int, 256)
 
 	if nl == 0 {
 		log.Fatal("cklrsort2a: 0 len lines: ", recix)
@@ -44,6 +44,10 @@ func cklrsort2a(klns kvallines, recix int, out chan kvallines) {
 	for i, _ := range klns {
 
 		if recix >= len(klns[i].key) {
+			piles[0] = append(piles[0], klns[i])
+			if nc == 0 {
+				nc = 1
+			}
 			continue
 		}
 
@@ -55,6 +59,9 @@ func cklrsort2a(klns kvallines, recix int, out chan kvallines) {
 		}
 		li = c
 	}
+	if nc == 0 {
+		return
+	}
 	if nc == 1 {
 		cbinsertionsort(piles[li], out)
 	}
@@ -64,7 +71,6 @@ func cklrsort2a(klns kvallines, recix int, out chan kvallines) {
 		if len(piles[i]) == 0 {
 			continue
 		}
-		pilelen[i] = len(piles[i])
 		// sort pile
 		cini := make(chan kvallines, 0)
 		chans = append(chans, cini)

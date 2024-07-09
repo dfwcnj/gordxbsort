@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 )
 
@@ -18,7 +19,7 @@ func binsertionsort(klns kvallines) kvallines {
 		return klns
 	}
 	for i := 0; i < n; i++ {
-		for j := i; j > 0 && string(klns[j-1].key) > string(klns[j].key); j-- {
+		for j := i; j > 0 && bytes.Compare(klns[j-1].key, klns[j].key) < 0; j-- {
 			klns[j], klns[j-1] = klns[j-1], klns[j]
 		}
 	}
@@ -31,7 +32,6 @@ func klrsort2a(klns kvallines, recix int) kvallines {
 	var nc int
 	var li int
 	nl := len(klns)
-	pilelen := make([]int, 256)
 
 	if nl == 0 {
 		log.Fatal("klrsort2a: 0 len lines: ", recix)
@@ -43,6 +43,10 @@ func klrsort2a(klns kvallines, recix int) kvallines {
 	for i, _ := range klns {
 
 		if recix >= len(klns[i].key) {
+			piles[0] = append(piles[0], klns[i])
+			if nc == 0 {
+				nc = 1
+			}
 			continue
 		}
 
@@ -54,6 +58,9 @@ func klrsort2a(klns kvallines, recix int) kvallines {
 		}
 		li = c
 	}
+	if nc == 0 {
+		return piles[0]
+	}
 	if nc == 1 {
 		return binsertionsort(piles[li])
 	}
@@ -62,18 +69,11 @@ func klrsort2a(klns kvallines, recix int) kvallines {
 		if len(piles[i]) == 0 {
 			continue
 		}
-		pilelen[i] = len(piles[i])
 		// sort pile
 		if len(piles[i]) < THRESHOLD {
 			piles[i] = binsertionsort(piles[i])
-			if len(piles[i]) != pilelen[i] {
-				log.Fatal("pilelen[", i, "] ", pilelen[i], "len(piles[i]) ", len(piles[i]))
-			}
 		} else {
 			piles[i] = klrsort2a(piles[i], recix+1)
-			if len(piles[i]) != pilelen[i] {
-				log.Fatal("pilelen[", i, "] ", pilelen[i], "len(piles[i]) ", len(piles[i]))
-			}
 		}
 		nc--
 		if nc == 0 {
@@ -83,9 +83,6 @@ func klrsort2a(klns kvallines, recix int) kvallines {
 
 	var slns kvallines
 	for i, _ := range piles {
-		if len(piles[i]) != pilelen[i] {
-			log.Fatal("pilelen[", i, "] ", pilelen[i], "len(piles[i]) ", len(piles[i]))
-		}
 		for j, _ := range piles[i] {
 			slns = append(slns, piles[i][j])
 		}
