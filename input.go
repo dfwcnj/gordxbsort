@@ -169,7 +169,8 @@ func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 	}
 
 	r := io.Reader(fp)
-	nw := bufio.NewReader(r)
+	//nw := bufio.NewReader(r)
+	nw := bufio.NewReaderSize(r, 1<<22)
 
 	for {
 		if memused >= iomem {
@@ -178,7 +179,7 @@ func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kv
 		}
 
 		l, err := nw.ReadString('\n')
-		// Seek seens to giv the buffer seek
+		// Seek seens to return the buffer offset
 		offset += int64(len(l))
 		if err != nil {
 			if err == io.EOF && len(l) == 0 {
