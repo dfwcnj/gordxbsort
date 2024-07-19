@@ -120,7 +120,7 @@ func pqreademit(ofp *os.File, reclen int, kg func([]byte) [][]byte, fns []string
 	heap.Init(&pq)
 
 	//nw := bufio.NewWriter(ofp)
-	nw := bufio.NewWriterSize(ofp, 1<<20)
+	nw := bufio.NewWriterSize(ofp, 1<<30)
 
 	for pq.Len() > 0 {
 		ritem := heap.Pop(&pq).(*ritem)
