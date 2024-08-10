@@ -41,7 +41,7 @@ func Test_sortfiles(t *testing.T) {
 		}
 
 		//log.Println("sorting file", i)
-		slns := klrsort2a(klns, 0)
+		slns := klrsortsl(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("sortfilestest", i))
 		//log.Println("saving file", i)
 		savemergefile(slns, fn, dlim)

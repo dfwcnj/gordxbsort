@@ -40,7 +40,7 @@ func Test_klchan(t *testing.T) {
 			log.Fatal("klns: before sort wanted len ", l, " got ", len(klns))
 		}
 
-		slns := klrsort2a(klns, 0)
+		slns := klrsortsl(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("file", i))
 		//mrlen = len(slns[0])
 		fn, _ = savemergefile(slns, fn, dlim)

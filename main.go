@@ -48,7 +48,7 @@ func sortflrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 			return klns, mfiles, mrlen, err
 		}
 
-		sklns := klrsort2a(klns, 0)
+		sklns := klrsortsl(klns, 0)
 
 		if offset > 0 && len(sklns) > 0 {
 			mfn := filepath.Join(dn, filepath.Base(fmt.Sprintf("%s%d", fn, i)))
@@ -103,7 +103,7 @@ func sortvlrecfile(fn string, dn string, reclen int, keyoff int, keylen int, iom
 			return klns, mfiles, err
 		}
 
-		sklns := klrsort2a(klns, 0)
+		sklns := klrsortsl(klns, 0)
 		//log.Println("sortvlrecfile sklns ", len(sklns))
 
 		if offset > 0 && len(sklns) > 0 {
