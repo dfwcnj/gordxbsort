@@ -28,7 +28,7 @@ func Test_sortvlrecfile(t *testing.T) {
 
 	dn, err := initmergedir("/tmp", "rdxsort")
 
-	log.Println("sortlrecfile test")
+	log.Println("sortvlrecfile test")
 
 	rsl := randomstrings(nrs, l, r)
 
