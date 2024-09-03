@@ -45,6 +45,6 @@ func main() {
 	if iomem != "" {
 		iom = parseiomem(iomem)
 	}
-	Sortfiles(fns, ofn, md, reclen, keyoff, keylen, iom)
+	gordxbinsort.Sortfiles(fns, ofn, md, reclen, keyoff, keylen, iom)
 
 }
