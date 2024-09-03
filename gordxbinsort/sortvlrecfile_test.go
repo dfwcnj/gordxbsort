@@ -1,7 +1,8 @@
-package main
+package gordxbinsort
 
 import (
 	"fmt"
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"path"
@@ -9,16 +10,12 @@ import (
 	"testing"
 )
 
-//type kvalline struct {
-//	key  []byte
-//	line []byte
-//}
-
 func Test_sortvlrecfile(t *testing.T) {
 	var l int = 32
 	var r bool = true
-	var nrs int = 1 << 20
-	var nss int
+	var e bool = false
+	var nrs int64 = 1 << 20
+	var nss int64
 	var iomem int64 = 1<<24 + 1<<20
 
 	//var klns kvallines
@@ -30,7 +27,7 @@ func Test_sortvlrecfile(t *testing.T) {
 
 	log.Println("sortvlrecfile test")
 
-	rsl := randomstrings(nrs, l, r)
+	rsl := randomdata.Randomstrings(nrs, l, r, e)
 
 	fn := path.Join(dn, "sortvlrecfiletest")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
@@ -55,7 +52,7 @@ func Test_sortvlrecfile(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		tklns, _, err = vlreadn(mfp, 0, 0, 0, iomem*2)
+		tklns, _, err = Vlreadn(mfp, 0, 0, 0, iomem*2)
 		//log.Println("sortvlrecfile test tklns ", len(tklns))
 
 		var lns = make([]string, 0)
@@ -65,7 +62,7 @@ func Test_sortvlrecfile(t *testing.T) {
 		if slices.IsSorted(lns) == false {
 			log.Fatal(f, " is not sorted")
 		}
-		nss += int(len(tklns))
+		nss += int64(len(tklns))
 	}
 	if nrs != nss {
 		log.Fatal("sortvlrecfile test wanted ", nrs, " got ", nss)

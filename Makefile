@@ -3,13 +3,15 @@
 .PHONY:fmt vet build
 
 fmt:
-	go fmt *.go
+	go fmt gordxbinsort/*.go
+	go fmt rdxbin/main.go
 
 vet: fmt
-	go vet *.go
+	go vet gordxbinsort/*.go
+	go vet rdxbin/main.go
 
 build: vet
-	go build -o rdxbin  main.go klrsort2a.go merge.go input.go pqread.go
+	go build -o rdxbin  rdxbin/main.go gordxbinsort/*.go
 
 profile:
 	go test -blockprofile block.prof -cpuprofile cpu.prof -memprofile mem.prof -mutexprofile mutex.prof -bench .

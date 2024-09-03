@@ -1,22 +1,19 @@
-package main
+package gordxbinsort
 
 import (
 	"fmt"
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"path"
 	"testing"
 )
 
-//type kvalline struct {
-//	key  []byte
-//	line []byte
-//}
-
 func Test_flreadn(t *testing.T) {
 	var l int = 32
 	var r bool = false
-	var lrs int = 1 << 20
+	var e bool = false
+	var lrs int64 = 1 << 20
 	var iomem int64 = 1 << 30
 
 	var klns kvallines
@@ -27,7 +24,7 @@ func Test_flreadn(t *testing.T) {
 
 	log.Println("flreadn test")
 
-	rsl := randomstrings(lrs, l, r)
+	rsl := randomdata.Randomstrings(lrs, l, r, e)
 	log.Println("flreadn test rsl ", len(rsl))
 
 	dn, err := initmergedir("/tmp", "rdxsort")
@@ -63,7 +60,7 @@ func Test_flreadn(t *testing.T) {
 
 	for {
 		//log.Println("flreadn test flreadn ", fn, " ", l)
-		klns, offset, err = flreadn(fp, offset, int(l), 0, 0, iomem)
+		klns, offset, err = Flreadn(fp, offset, int(l), 0, 0, iomem)
 		if len(klns) == 0 {
 			break
 		}

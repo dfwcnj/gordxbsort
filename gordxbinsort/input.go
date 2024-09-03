@@ -1,4 +1,4 @@
-package main
+package gordxbinsort
 
 import (
 	"bufio"
@@ -8,12 +8,6 @@ import (
 	"os"
 	"strings"
 )
-
-//type kvalline struct {
-//        key  []byte
-//        line []byte
-//}
-//type kvallines []kvalline
 
 func flreadall(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
 
@@ -41,7 +35,7 @@ func flreadall(fp *os.File, offset int64, reclen int, keyoff int, keylen int, io
 	}
 }
 
-func flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
+func Flreadn(fp *os.File, offset int64, reclen int, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
 
 	var klns kvallines
 	var nr int // number records read
@@ -147,7 +141,7 @@ func vlreadall(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (
 	return klns, offset, nil
 }
 
-func vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
+func Vlreadn(fp *os.File, offset int64, keyoff int, keylen int, iomem int64) (kvallines, int64, error) {
 
 	var klns kvallines
 	var memused int64

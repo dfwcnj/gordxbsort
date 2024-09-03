@@ -1,7 +1,8 @@
-package main
+package gordxbinsort
 
 import (
 	"fmt"
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"path"
@@ -9,15 +10,11 @@ import (
 	"testing"
 )
 
-//type kvalline struct {
-//	key  []byte
-//	line []byte
-//}
-
 func Test_sortflrecfile(t *testing.T) {
 	var l int = 32
 	var r bool = false
-	var nrs int = 1 << 20
+	var e bool = false
+	var nrs int64 = 1 << 20
 	var iomem int64 = 1<<24 + 1<<20
 	var mrlen int
 
@@ -29,7 +26,7 @@ func Test_sortflrecfile(t *testing.T) {
 
 	log.Println("sortflrecfile test")
 
-	rsl := randomstrings(nrs, l, r)
+	rsl := randomdata.Randomstrings(nrs, l, r, e)
 
 	fn := path.Join(dn, "sortflrecfiletest")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
@@ -55,7 +52,7 @@ func Test_sortflrecfile(t *testing.T) {
 		if err != nil {
 			log.Fatal("sortflrecfiletest ", err)
 		}
-		tklns, _, err = flreadn(mfp, 0, mrlen, 0, 0, finf.Size())
+		tklns, _, err = Flreadn(mfp, 0, mrlen, 0, 0, finf.Size())
 		var lns = make([]string, 0)
 		for _, t := range tklns {
 			lns = append(lns, string(t.line))
@@ -65,7 +62,7 @@ func Test_sortflrecfile(t *testing.T) {
 		}
 		nss += int(len(tklns))
 	}
-	if nrs != nss {
+	if nrs != int64(nss) {
 		log.Fatal("sortflrecfile test wanted ", nrs, " got ", nss)
 	}
 	log.Println("sortflrecfile passed")

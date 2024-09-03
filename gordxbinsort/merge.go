@@ -1,4 +1,4 @@
-package main
+package gordxbinsort
 
 import (
 	"bufio"
@@ -87,7 +87,7 @@ func klnullsplit(bln []byte) [][]byte {
 	return bls
 }
 
-func mergefiles(ofn string, reclen int, fns []string) {
+func Mergefiles(ofn string, reclen int, fns []string) {
 	// log.Print("multi step merge not implemented")
 
 	var err error

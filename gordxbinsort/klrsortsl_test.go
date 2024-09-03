@@ -1,25 +1,21 @@
-package main
+package gordxbinsort
 
 import (
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"sort"
 	"testing"
 )
 
-//type kvalline struct {
-//	key  []byte
-//	line []byte
-//}
-//type kvallines []kvalline
-
 func Test_klrsortsl(t *testing.T) {
 
 	log.Print("klrsortsl test")
 	var l int = 32
 	var r bool = true
-	//ls := []int{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
-	ls := []int{1 << 4, 1 << 10, 1 << 20, 1 << 24}
+	var e bool = false
+	//ls := []int64{1, 2, 1 << 4, 1 << 8, 1 << 16, 1 << 20, 1 << 24}
+	ls := []int64{1 << 4, 1 << 10, 1 << 20, 1 << 24}
 
 	for _, nl := range ls {
 
@@ -27,7 +23,7 @@ func Test_klrsortsl(t *testing.T) {
 		var klns kvallines
 
 		//log.Print("testing sort of ", nl)
-		rsl := randomstrings(nl, l, r)
+		rsl := randomdata.Randomstrings(nl, l, r, e)
 		if len(rsl) != int(nl) {
 			log.Fatal("rsl: wanted len ", nl, " got ", len(rsl))
 		}
@@ -41,7 +37,7 @@ func Test_klrsortsl(t *testing.T) {
 		if len(klns) != int(nl) {
 			log.Fatal("klns: before sort wanted len ", nl, " got ", len(klns))
 		}
-		slns := klrsortsl(klns, 0)
+		slns := KLrsortsl(klns, 0)
 		if len(slns) != int(nl) {
 			log.Fatal("slns: after sort wanted len ", nl, " got ", len(slns))
 		}

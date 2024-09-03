@@ -1,4 +1,4 @@
-package main
+package gordxbinsort
 
 import (
 	"bytes"
@@ -6,12 +6,6 @@ import (
 )
 
 const THRESHOLD int = 1 << 5
-
-type kvalline struct {
-	key  []byte
-	line []byte
-}
-type kvallines []kvalline
 
 func binsertionsort(klns kvallines) kvallines {
 	n := len(klns)
@@ -27,7 +21,7 @@ func binsertionsort(klns kvallines) kvallines {
 }
 
 // bostic
-func klrsortsl(klns kvallines, recix int) kvallines {
+func KLrsortsl(klns kvallines, recix int) kvallines {
 	var piles = make([]kvallines, 256)
 	var nc int // number piles
 	nl := len(klns)
@@ -70,7 +64,7 @@ func klrsortsl(klns kvallines, recix int) kvallines {
 		if len(piles[i]) < THRESHOLD {
 			piles[i] = binsertionsort(piles[i])
 		} else {
-			piles[i] = klrsortsl(piles[i], recix+1)
+			piles[i] = KLrsortsl(piles[i], recix+1)
 		}
 		nc--
 		if nc == 0 {

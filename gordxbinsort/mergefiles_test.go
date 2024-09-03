@@ -1,8 +1,9 @@
-package main
+package gordxbinsort
 
 import (
 	"bufio"
 	"fmt"
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,7 +14,8 @@ import (
 func Test_mergefiles(t *testing.T) {
 	var l int = 32
 	var r bool = true
-	var nrs int = 1 << 20
+	var e bool = false
+	var nrs int64 = 1 << 20
 	var dlim string
 	dlim = "\n"
 	var nmf = 10
@@ -31,7 +33,7 @@ func Test_mergefiles(t *testing.T) {
 		var klns kvallines
 		var kln kvalline
 
-		rsl := randomstrings(nrs, l, r)
+		rsl := randomdata.Randomstrings(nrs, l, r, e)
 		for _, s := range rsl {
 			bln := []byte(s)
 			kln.line = bln
@@ -42,7 +44,7 @@ func Test_mergefiles(t *testing.T) {
 			log.Fatal("klns: before sort wanted len ", l, " got ", len(klns))
 		}
 
-		slns := klrsortsl(klns, 0)
+		slns := KLrsortsl(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("file", i))
 		savemergefile(slns, fn, dlim)
 		fns = append(fns, fn)
@@ -50,7 +52,7 @@ func Test_mergefiles(t *testing.T) {
 
 	mfn := "mergeout.txt"
 	mpath := filepath.Join(dn, mfn)
-	mergefiles(mpath, 0, fns)
+	Mergefiles(mpath, 0, fns)
 
 	mfp, err := os.Open(mpath)
 	if err != nil {

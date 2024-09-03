@@ -1,7 +1,8 @@
-package main
+package gordxbinsort
 
 import (
 	"fmt"
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,7 +12,8 @@ import (
 func Test_klchan(t *testing.T) {
 	var l int = 32
 	var r bool = true
-	var nrs int = 1 << 20
+	var e bool = false
+	var nrs int64 = 1 << 20
 	var dlim string
 	dlim = "\n"
 	// var mrlen int
@@ -28,7 +30,7 @@ func Test_klchan(t *testing.T) {
 		var klns kvallines
 		var kln kvalline
 
-		rsl := randomstrings(nrs, l, r)
+		rsl := randomdata.Randomstrings(nrs, l, r, e)
 		for _, s := range rsl {
 			bln := []byte(s)
 			kln.line = bln
@@ -40,7 +42,7 @@ func Test_klchan(t *testing.T) {
 			log.Fatal("klns: before sort wanted len ", l, " got ", len(klns))
 		}
 
-		slns := klrsortsl(klns, 0)
+		slns := KLrsortsl(klns, 0)
 		var fn = filepath.Join(dn, fmt.Sprint("file", i))
 		//mrlen = len(slns[0])
 		fn, _ = savemergefile(slns, fn, dlim)

@@ -1,22 +1,19 @@
-package main
+package gordxbinsort
 
 import (
 	"fmt"
+	"github.com/dfwcnj/randomdata"
 	"log"
 	"os"
 	"path"
 	"testing"
 )
 
-//type kvalline struct {
-//	key  []byte
-//	line []byte
-//}
-
 func Test_vlreadn(t *testing.T) {
 	var l int = 32
 	var r bool = true
-	var nrs int = 1 << 20
+	var e bool = false
+	var nrs int64 = 1 << 20
 	var iomem int64 = 1 << 30
 	var nr int
 
@@ -30,7 +27,7 @@ func Test_vlreadn(t *testing.T) {
 	}
 	defer os.RemoveAll(dn)
 
-	rsl := randomstrings(nrs, l, r)
+	rsl := randomdata.Randomstrings(nrs, l, r, e)
 
 	fn := path.Join(dn, "vlreadn")
 	fp, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0644)
@@ -48,7 +45,7 @@ func Test_vlreadn(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	klns, _, err = vlreadn(fp, 0, 0, 0, iomem)
+	klns, _, err = Vlreadn(fp, 0, 0, 0, iomem)
 	for _, kln := range klns {
 		if len(kln.line) == 0 {
 			log.Fatal("vlreadn len(kln.line) == 0")
