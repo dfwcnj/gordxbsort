@@ -8,6 +8,11 @@
 
 ## gordxbsort
 
+cd rdxbin
+go fmt
+go vet
+go build
+
 This command sorts n files using radix sort and merges these sorted
 files to one output.
 
